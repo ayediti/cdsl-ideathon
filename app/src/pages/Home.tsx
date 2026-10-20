@@ -1,8 +1,11 @@
+import { ArrowRight, BookMarked, Check, Layers, Lock, PartyPopper, Play, RotateCcw } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BRAND } from '../brand';
-import { DnaCard } from '../components/DnaCard';
+import { DNA_ICON, DnaCard } from '../components/DnaCard';
 import { Hud } from '../components/Hud';
-import { chapterKey, isChapterUnlocked, MODULES, screenPath } from '../engine/curriculum';
+import { Logo } from '../components/Logo';
+import { ALL_CHAPTERS, chapterKey, isChapterUnlocked, MODULES, screenPath } from '../engine/curriculum';
+import { DNA_TYPES } from '../engine/dna';
 import { useSimStore } from '../engine/simStore';
 import { VirtualPhone } from '../phone/VirtualPhone';
 
@@ -11,77 +14,121 @@ export function Home() {
   const { completed, progress, dna, reset } = useSimStore();
   const state = useLocation().state as { justCompleted?: string; nextTitle?: string } | null;
 
-  const resumePath = progress ? `/play/${progress.moduleId}/${progress.chapterId}/${progress.screenId}` : null;
+  const doneCount = ALL_CHAPTERS.filter((c) => completed.includes(chapterKey(c))).length;
+  const nextUp = ALL_CHAPTERS.find((c) => !completed.includes(chapterKey(c)));
+  const inProgress =
+    progress && nextUp && progress.moduleId === nextUp.moduleId && progress.chapterId === nextUp.id
+      ? `/play/${progress.moduleId}/${progress.chapterId}/${progress.screenId}`
+      : null;
+  const ctaPath = inProgress ?? (nextUp ? screenPath(nextUp) : null);
+  const DnaIcon = dna ? DNA_ICON[dna.dominant] : null;
 
   const onReset = () => {
     if (window.confirm('Reset all progress and start the simulation again?')) reset();
   };
 
   return (
-    <div className="player">
+    <div className="app-shell">
       <header className="topbar">
-        <Link to="/" className="brand">
-          {BRAND}
-        </Link>
+        <Logo />
         <div className="topbar__meta">
-          <span>Your journey</span>
+          <span className="topbar__module">Your journey</span>
         </div>
-        <Link to="/library" className="btn btn--ghost">
-          Library
+        <Link to="/library" className="icon-btn icon-btn--label">
+          <BookMarked size={18} />
+          <span>Library</span>
         </Link>
       </header>
 
-      <div className="player__body">
+      <div className="layout">
         <main className="stage">
           {state?.justCompleted && (
-            <div className="outcome outcome--good" role="status">
-              <strong>Chapter complete: {state.justCompleted}.</strong>
-              {state.nextTitle ? ` Next up: ${state.nextTitle}.` : ' You have finished everything available so far.'}
+            <div className="banner" role="status">
+              <PartyPopper size={22} />
+              <span>
+                <strong>Chapter complete: {state.justCompleted}.</strong>
+                {state.nextTitle ? ` Next up: ${state.nextTitle}.` : ' You have finished everything available so far.'}
+              </span>
             </div>
           )}
 
-          <div className="journey-head">
-            <h1>Journey map</h1>
-            {resumePath && (
-              <Link to={resumePath} className="btn btn--primary">
-                Resume
-              </Link>
-            )}
-          </div>
+          <section className="welcome">
+            <div className="welcome__text">
+              <span className="eyebrow">Your journey</span>
+              <h1 className="display">{nextUp ? (doneCount ? 'Pick up where you left off' : 'Your money life starts here') : 'All caught up'}</h1>
+              <p className="lead">
+                {doneCount} of {ALL_CHAPTERS.length} chapters complete
+                {nextUp && (
+                  <>
+                    {' '}
+                    · next: <strong>{nextUp.title}</strong>
+                  </>
+                )}
+              </p>
+              <div className="welcome__bar" aria-hidden="true">
+                <span style={{ width: `${(doneCount / ALL_CHAPTERS.length) * 100}%` }} />
+              </div>
+              <div className="welcome__actions">
+                {ctaPath && (
+                  <Link to={ctaPath} className="btn btn--primary btn--lg">
+                    <Play size={18} /> {inProgress ? 'Resume' : doneCount ? 'Start next chapter' : 'Start'}
+                  </Link>
+                )}
+                {dna && DnaIcon && (
+                  <span className="dna-chip" style={{ '--dna': DNA_TYPES[dna.dominant].color } as CSSProperties}>
+                    <DnaIcon size={16} /> {DNA_TYPES[dna.dominant].name}
+                  </span>
+                )}
+              </div>
+            </div>
+          </section>
 
           {MODULES.map((m, mi) => (
             <section key={m.id} className="module">
-              <p className="eyebrow">
-                Module {String(mi).padStart(2, '0')} · {m.tagline}
-              </p>
-              <h2>{m.title}</h2>
-              <ol className="chapters">
+              <div className="module__head">
+                <span className="module__num mono">{String(mi).padStart(2, '0')}</span>
+                <div>
+                  <h2>{m.title}</h2>
+                  <p>{m.tagline}</p>
+                </div>
+              </div>
+              <ol className="path">
                 {m.chapters.map((c) => {
+                  const n = ALL_CHAPTERS.indexOf(c) + 1;
                   const done = completed.includes(chapterKey(c));
                   const unlocked = isChapterUnlocked(c, completed);
-                  const current = progress?.moduleId === c.moduleId && progress.chapterId === c.id && !done;
-                  const status = done ? 'Completed' : current ? 'In progress' : unlocked ? 'Ready' : 'Locked';
+                  const current = !done && unlocked && c === nextUp;
+                  const status = done ? 'done' : current ? 'current' : unlocked ? 'open' : 'locked';
+                  const label = { done: 'Completed', current: 'Up next', open: 'Ready', locked: 'Locked' }[status];
+                  const to = current && inProgress ? inProgress : screenPath(c);
                   return (
-                    <li key={c.id} className={`chapter chapter--${status.toLowerCase().replace(' ', '-')}`}>
-                      <div>
-                        <h3>{c.title}</h3>
-                        <p>{c.blurb}</p>
-                        <span className="chapter__meta">
-                          {c.screenSequence.length} screens · {status}
-                        </span>
+                    <li key={c.id} className={`path__item is-${status}`}>
+                      <span className="path__node" aria-hidden="true">
+                        {done ? <Check size={18} /> : unlocked ? n : <Lock size={15} />}
+                      </span>
+                      <div className="path__card">
+                        <div className="path__text">
+                          <span className="path__status">{label}</span>
+                          <h3>{c.title}</h3>
+                          <p>{c.blurb}</p>
+                          <span className="path__meta">
+                            <Layers size={14} /> {c.screenSequence.length} screens
+                          </span>
+                        </div>
+                        {unlocked && (
+                          <Link className={done ? 'btn btn--ghost' : 'btn btn--primary'} to={to}>
+                            {done ? (
+                              <>
+                                <RotateCcw size={16} /> Replay
+                              </>
+                            ) : (
+                              <>
+                                {current && inProgress ? 'Continue' : 'Start'} <ArrowRight size={16} />
+                              </>
+                            )}
+                          </Link>
+                        )}
                       </div>
-                      {unlocked ? (
-                        <Link
-                          className={done ? 'btn btn--ghost' : 'btn btn--secondary'}
-                          to={current && resumePath ? resumePath : screenPath(c)}
-                        >
-                          {done ? 'Replay' : current ? 'Continue' : 'Start'}
-                        </Link>
-                      ) : (
-                        <span className="lock" aria-label="Locked">
-                          🔒
-                        </span>
-                      )}
                     </li>
                   );
                 })}
@@ -91,13 +138,19 @@ export function Home() {
 
           {dna && (
             <section className="module">
-              <p className="eyebrow">Your Money DNA</p>
+              <div className="module__head">
+                <span className="module__num mono">★</span>
+                <div>
+                  <h2>Your Money DNA</h2>
+                  <p>How you tend to decide about money.</p>
+                </div>
+              </div>
               <DnaCard result={dna} />
             </section>
           )}
 
-          <button className="link-button danger" onClick={onReset}>
-            Reset simulation
+          <button className="link-button link-button--danger" onClick={onReset}>
+            <RotateCcw size={15} /> Reset simulation
           </button>
         </main>
         <aside className="hud" aria-label="Your simulation">

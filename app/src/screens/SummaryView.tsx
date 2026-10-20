@@ -1,4 +1,8 @@
-import { computeFhs } from '../engine/fhs';
+import { CircleCheck, Trophy } from 'lucide-react';
+import type { CSSProperties } from 'react';
+import { ScoreRing } from '../components/ScoreRing';
+import { inr } from '../engine/dates';
+import { computeFhs, netWorth } from '../engine/fhs';
 import { useSimStore } from '../engine/simStore';
 import { render } from '../engine/template';
 import type { SummaryScreen } from '../engine/types';
@@ -8,24 +12,36 @@ export function SummaryView({ def }: ScreenProps<SummaryScreen>) {
   const sim = useSimStore();
   const fhs = computeFhs(sim);
   return (
-    <article className="screen">
-      <p className="eyebrow">Chapter complete</p>
-      <h1>{def.title}</h1>
+    <article className="screen summary">
+      <div className="confetti" aria-hidden="true">
+        {Array.from({ length: 18 }, (_, i) => (
+          <span key={i} style={{ '--i': i } as CSSProperties} />
+        ))}
+      </div>
+      <div className="summary__trophy" aria-hidden="true">
+        <Trophy size={34} />
+      </div>
+      <h1 className="display">{def.title}</h1>
       <ul className="takeaways">
         {def.points.map((p, i) => (
-          <li key={i}>{render(p, sim)}</li>
+          <li key={i}>
+            <CircleCheck size={20} />
+            <span>{render(p, sim)}</span>
+          </li>
         ))}
       </ul>
-      <div className="stat-row">
-        <div className="stat">
-          <span className="stat__label">Health score</span>
-          <span className="stat__value">
-            {fhs.score} <small>{fhs.tier}</small>
-          </span>
+      <div className="summary__stats">
+        <div className="tile tile--ring">
+          <ScoreRing score={fhs.score} tier={fhs.tier} size={76} />
+          <span className="label">Health score</span>
         </div>
-        <div className="stat">
-          <span className="stat__label">Total XP</span>
-          <span className="stat__value">{sim.xp}</span>
+        <div className="tile">
+          <span className="label">Net worth</span>
+          <strong className="mono">{inr(netWorth(sim))}</strong>
+        </div>
+        <div className="tile">
+          <span className="label">Total XP</span>
+          <strong className="mono">{sim.xp}</strong>
         </div>
       </div>
     </article>

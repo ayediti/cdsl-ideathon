@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
 import { useSimStore } from '../engine/simStore';
 import type { DecisionOption, DecisionScreen } from '../engine/types';
+import { effectChips } from './kindMeta';
+import { Outcome } from './Outcome';
 import type { ScreenProps } from './screenProps';
 
-const TONE_LABEL = { good: 'Smart move', bad: 'Ouch', neutral: 'Hmm' } as const;
+const TONE_TITLE = { good: 'Smart move', bad: 'Ouch', neutral: 'Hmm, not ideal' } as const;
+const LETTERS = 'ABCDEFG';
 
 export function DecisionView({ def, screenKey, setReady }: ScreenProps<DecisionScreen>) {
   const chosen = useSimStore((s) => s.flags[def.saveAs]) as string | undefined;
@@ -22,10 +25,10 @@ export function DecisionView({ def, screenKey, setReady }: ScreenProps<DecisionS
 
   return (
     <article className="screen">
-      <h1>{def.title}</h1>
-      <p className="prompt">{def.prompt}</p>
+      <h1 className="display">{def.title}</h1>
+      <p className="lead">{def.prompt}</p>
       <div className="options" role="group" aria-label="Choices">
-        {def.options.map((o) => (
+        {def.options.map((o, i) => (
           <button
             key={o.id}
             className={`option ${chosen === o.id ? 'option--picked' : ''}`}
@@ -33,15 +36,18 @@ export function DecisionView({ def, screenKey, setReady }: ScreenProps<DecisionS
             disabled={!!chosen && chosen !== o.id}
             aria-pressed={chosen === o.id}
           >
-            <span className="option__label">{o.label}</span>
-            {o.detail && <span className="option__detail">{o.detail}</span>}
+            <span className="option__letter">{LETTERS[i]}</span>
+            <span className="option__text">
+              <span className="option__label">{o.label}</span>
+              {o.detail && <span className="option__detail">{o.detail}</span>}
+            </span>
           </button>
         ))}
       </div>
       {picked && (
-        <div className={`outcome outcome--${picked.tone}`} role="status">
-          <strong>{TONE_LABEL[picked.tone]}.</strong> {picked.outcome}
-        </div>
+        <Outcome tone={picked.tone} title={TONE_TITLE[picked.tone]} chips={effectChips(picked.effects)}>
+          {picked.outcome}
+        </Outcome>
       )}
     </article>
   );

@@ -1,25 +1,34 @@
+import { ArrowRight, BookOpen, ChevronLeft } from 'lucide-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { BRAND } from '../brand';
+import { Logo } from '../components/Logo';
 import { Markdown } from '../components/Markdown';
 import { ARTICLES, getArticle } from '../engine/library';
 
 export function Library() {
   return (
-    <div className="page">
+    <div className="app-shell">
       <header className="topbar">
-        <Link to="/home" className="brand">
-          {BRAND}
-        </Link>
+        <Logo to="/home" />
         <div className="topbar__meta">
-          <span>Library</span>
+          <span className="topbar__module">Library</span>
         </div>
       </header>
-      <main className="page__main">
-        <h1>Library</h1>
-        <ul className="article-list">
+      <main className="page">
+        <span className="eyebrow">Library</span>
+        <h1 className="display">Read up, in plain language</h1>
+        <p className="lead">Short explainers linked from the simulation’s help panel.</p>
+        <ul className="article-grid">
           {ARTICLES.map((a) => (
             <li key={a.slug}>
-              <Link to={`/library/${a.slug}`}>{a.title}</Link>
+              <Link to={`/library/${a.slug}`} className="article-card">
+                <span className="article-card__icon">
+                  <BookOpen size={20} />
+                </span>
+                <strong>{a.title}</strong>
+                <span className="article-card__more">
+                  Read <ArrowRight size={15} />
+                </span>
+              </Link>
             </li>
           ))}
         </ul>
@@ -34,26 +43,28 @@ export function LibraryArticle() {
   const article = getArticle(slug);
 
   return (
-    <div className="page">
+    <div className="app-shell">
       <header className="topbar">
-        <Link to="/home" className="brand">
-          {BRAND}
-        </Link>
+        <Logo to="/home" />
         <div className="topbar__meta">
-          <Link to="/library">Library</Link>
+          <Link to="/library" className="topbar__module">
+            Library
+          </Link>
         </div>
-        <button className="btn btn--ghost" onClick={() => navigate(-1)}>
-          Back
+        <button className="icon-btn icon-btn--label" onClick={() => navigate(-1)}>
+          <ChevronLeft size={18} />
+          <span>Back</span>
         </button>
       </header>
-      <main className="page__main">
+      <main className="page">
         {article ? (
-          <>
-            <h1>{article.title}</h1>
+          <article className="article">
+            <span className="eyebrow">Library</span>
+            <h1 className="display">{article.title}</h1>
             <Markdown source={article.body} skipTitle />
-          </>
+          </article>
         ) : (
-          <p>Article not found.</p>
+          <p className="lead">Article not found.</p>
         )}
       </main>
     </div>

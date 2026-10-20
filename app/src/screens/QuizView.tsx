@@ -1,9 +1,12 @@
+import { Check, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSimStore } from '../engine/simStore';
 import type { QuizQuestion, QuizScreen } from '../engine/types';
+import { Outcome } from './Outcome';
 import type { ScreenProps } from './screenProps';
 
 const XP_PER_CORRECT = 10;
+const LETTERS = 'ABCDEFG';
 
 export function QuizView({ def, screenKey, setReady }: ScreenProps<QuizScreen>) {
   const [answers, setAnswers] = useState<Record<string, number>>({});
@@ -23,15 +26,16 @@ export function QuizView({ def, screenKey, setReady }: ScreenProps<QuizScreen>) 
 
   return (
     <article className="screen">
-      <h1>{def.title}</h1>
-      {def.intro && <p>{def.intro}</p>}
+      <h1 className="display">{def.title}</h1>
+      {def.intro && <p className="lead">{def.intro}</p>}
       {def.questions.map((q, qi) => {
         const answered = answers[q.id];
-        const correct = answered !== undefined && q.options[answered].correct;
+        const correct = answered !== undefined && !!q.options[answered].correct;
         return (
           <section key={q.id} className="quiz-q">
             <h2>
-              {qi + 1}. {q.q}
+              <span className="quiz-q__num">Q{qi + 1}</span>
+              {q.q}
             </h2>
             <div className="options" role="group" aria-label={`Question ${qi + 1}`}>
               {q.options.map((o, oi) => {
@@ -45,15 +49,24 @@ export function QuizView({ def, screenKey, setReady }: ScreenProps<QuizScreen>) 
                     disabled={answered !== undefined}
                     aria-pressed={answered === oi}
                   >
-                    <span className="option__label">{o.label}</span>
+                    <span className="option__letter">
+                      {state === 'option--correct' ? <Check size={16} /> : state === 'option--wrong' ? <X size={16} /> : LETTERS[oi]}
+                    </span>
+                    <span className="option__text">
+                      <span className="option__label">{o.label}</span>
+                    </span>
                   </button>
                 );
               })}
             </div>
             {answered !== undefined && (
-              <div className={`outcome outcome--${correct ? 'good' : 'bad'}`} role="status">
-                <strong>{correct ? `Correct (+${XP_PER_CORRECT} XP).` : 'Not quite.'}</strong> {q.explain}
-              </div>
+              <Outcome
+                tone={correct ? 'good' : 'bad'}
+                title={correct ? 'Correct' : 'Not quite'}
+                chips={correct ? [{ text: `+${XP_PER_CORRECT} XP`, tone: 'good' }] : []}
+              >
+                {q.explain}
+              </Outcome>
             )}
           </section>
         );

@@ -27,6 +27,10 @@ export function formatDate(iso: string): string {
   });
 }
 
+export function formatWeekday(iso: string): string {
+  return toDate(iso).toLocaleDateString('en-IN', { weekday: 'long', timeZone: 'UTC' });
+}
+
 export function inr(amount: number): string {
   return `₹${Math.round(amount).toLocaleString('en-IN')}`;
 }

@@ -1,3 +1,4 @@
+import { Eye, MessageSquare, PhoneIncoming, Siren } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { AutopsyFlag, AutopsyScreen } from '../engine/types';
 import type { ScreenProps } from './screenProps';
@@ -59,31 +60,50 @@ export function AutopsyView({ def, setReady }: ScreenProps<AutopsyScreen>) {
       ),
     );
 
+  const isCall = def.artifact.channel === 'call';
+
   return (
     <article className="screen">
-      <h1>{def.title}</h1>
-      <p>{def.intro}</p>
+      <h1 className="display">{def.title}</h1>
+      <p className="lead">{def.intro}</p>
+
       <div className={`artifact artifact--${def.artifact.channel}`}>
-        <div className="artifact__from">
-          {def.artifact.channel === 'call' ? 'Incoming call · ' : 'SMS · '}
-          {renderSegments(def.artifact.from)}
+        <div className="artifact__head">
+          <span className="artifact__app">{isCall ? <PhoneIncoming size={16} /> : <MessageSquare size={16} />}</span>
+          <span className="artifact__from">{renderSegments(def.artifact.from)}</span>
+          <span className="artifact__time">{isCall ? 'Incoming call' : 'now'}</span>
         </div>
         <div className="artifact__text">{renderSegments(def.artifact.text)}</div>
       </div>
-      <p className="counter" aria-live="polite">
-        Red flags found: {found.length} / {def.flags.length}
+
+      <div className="flag-progress" aria-live="polite">
+        <div className="flag-progress__pips" aria-hidden="true">
+          {def.flags.map((f) => (
+            <span key={f.id} className={found.includes(f.id) ? 'pip pip--on' : 'pip'} />
+          ))}
+        </div>
+        <span>
+          <strong>{found.length}</strong> of {def.flags.length} red flags found
+        </span>
         {!allFound && (
           <button className="link-button" onClick={() => setFound(def.flags.map((f) => f.id))}>
-            Show all
+            <Eye size={15} /> Reveal all
           </button>
         )}
-      </p>
-      <ul className="flag-list">
+      </div>
+
+      <ul className="flag-cards">
         {def.flags
           .filter((f) => found.includes(f.id))
           .map((f) => (
-            <li key={f.id}>
-              <strong>“{f.snippet}”</strong> — {f.why}
+            <li key={f.id} className="flag-card">
+              <span className="flag-card__icon">
+                <Siren size={18} />
+              </span>
+              <div>
+                <strong>“{f.snippet}”</strong>
+                <p>{f.why}</p>
+              </div>
             </li>
           ))}
       </ul>

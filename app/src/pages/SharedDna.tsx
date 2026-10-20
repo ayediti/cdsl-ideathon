@@ -1,6 +1,7 @@
+import { ArrowRight } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
-import { BRAND } from '../brand';
 import { DnaCard } from '../components/DnaCard';
+import { Logo } from '../components/Logo';
 import { decodeDnaToken } from '../engine/dna';
 
 /** Public share page: /dna/s/:token (FiAlly: /money-dna/s/:token). */
@@ -9,23 +10,21 @@ export function SharedDna() {
   const result = decodeDnaToken(token);
 
   return (
-    <div className="page">
+    <div className="app-shell">
       <header className="topbar">
-        <Link to="/" className="brand">
-          {BRAND}
-        </Link>
+        <Logo />
       </header>
-      <main className="page__main">
+      <main className="page page--narrow">
         {result ? (
           <>
-            <p className="eyebrow">Someone shared their Money DNA</p>
+            <span className="eyebrow">Someone shared their Money DNA</span>
             <DnaCard result={result} />
           </>
         ) : (
-          <p>This share link is not valid.</p>
+          <p className="lead">This share link is not valid.</p>
         )}
-        <Link to="/" className="btn btn--primary">
-          Discover yours
+        <Link to="/" className="btn btn--primary btn--lg">
+          Discover yours <ArrowRight size={18} />
         </Link>
       </main>
     </div>

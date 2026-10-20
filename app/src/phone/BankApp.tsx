@@ -1,7 +1,8 @@
+import { ArrowDownLeft, ArrowUpRight, Ban, Repeat } from 'lucide-react';
 import { useEffect } from 'react';
 import { BANK_NAME } from '../brand';
 import { formatDate, inr } from '../engine/dates';
-import { ACCOUNT_LABEL, useSimStore } from '../engine/simStore';
+import { useSimStore } from '../engine/simStore';
 
 export function BankApp() {
   const { savings, rd, mandates, transactions } = useSimStore();
@@ -16,45 +17,66 @@ export function BankApp() {
   return (
     <div className="bank">
       <div className="bank-card">
-        <span>{BANK_NAME} · Savings XX4417</span>
-        <strong>{inr(savings)}</strong>
-        {rd > 0 && <span>Recurring deposit: {inr(rd)}</span>}
+        <div className="bank-card__top">
+          <span>{BANK_NAME}</span>
+          <span className="bank-card__chip" aria-hidden="true" />
+        </div>
+        <span className="bank-card__label">Savings · XX4417</span>
+        <strong className="bank-card__balance">{inr(savings)}</strong>
+        <div className="bank-card__foot">
+          <span>Recurring deposit</span>
+          <b>{inr(rd)}</b>
+        </div>
       </div>
 
       {mandates.length > 0 && (
-        <section>
+        <section className="bank-section">
           <h4>Auto-debits</h4>
-          <ul className="plain-list">
-            {mandates.map((m) => (
-              <li key={m.id}>
-                {m.label} · {m.runs}/{m.maxRuns} paid
-                {m.runs < m.maxRuns && <> · next {formatDate(m.nextDate)}</>}
-              </li>
-            ))}
-          </ul>
+          {mandates.map((m) => (
+            <div key={m.id} className="mandate">
+              <span className="mandate__icon">
+                <Repeat size={16} />
+              </span>
+              <div>
+                <strong>{m.label}</strong>
+                <span>
+                  {m.runs}/{m.maxRuns} paid{m.runs < m.maxRuns && ` · next ${formatDate(m.nextDate)}`}
+                </span>
+              </div>
+              <span className="mandate__bar" aria-hidden="true">
+                <span style={{ width: `${(m.runs / m.maxRuns) * 100}%` }} />
+              </span>
+            </div>
+          ))}
         </section>
       )}
 
-      <section>
+      <section className="bank-section">
         <h4>Statement</h4>
         {bankTxns.length === 0 ? (
-          <p className="hint">No transactions yet.</p>
+          <p className="phone-empty">No transactions yet.</p>
         ) : (
           <ul className="txn-list">
-            {bankTxns.map((t) => (
-              <li key={t.id} className={t.status === 'failed' ? 'txn txn--failed' : 'txn'}>
-                <div>
-                  <span className="txn__desc">{t.description}</span>
-                  <span className="txn__meta">
-                    {formatDate(t.date)} · {ACCOUNT_LABEL[t.account]} · {t.counterparty}
+            {bankTxns.map((t) => {
+              const Icon = t.status === 'failed' ? Ban : t.type === 'credit' ? ArrowDownLeft : ArrowUpRight;
+              return (
+                <li key={t.id} className={`txn ${t.status === 'failed' ? 'txn--failed' : ''}`}>
+                  <span className={`txn__icon txn__icon--${t.status === 'failed' ? 'failed' : t.type}`}>
+                    <Icon size={16} />
                   </span>
-                </div>
-                <span className={t.type === 'credit' ? 'amount amount--in' : 'amount amount--out'}>
-                  {t.type === 'credit' ? '+' : '−'}
-                  {inr(t.amount)}
-                </span>
-              </li>
-            ))}
+                  <span className="txn__body">
+                    <span className="txn__desc">{t.description}</span>
+                    <span className="txn__meta">
+                      {formatDate(t.date)} · {t.counterparty}
+                    </span>
+                  </span>
+                  <span className={`amount amount--${t.type === 'credit' ? 'in' : 'out'}`}>
+                    {t.type === 'credit' ? '+' : '−'}
+                    {inr(t.amount)}
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
