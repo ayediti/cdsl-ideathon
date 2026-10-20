@@ -9,6 +9,8 @@ import { SharedDna } from './pages/SharedDna';
 export default function App() {
   return (
     <>
+      {/* Before <Routes> so it subscribes before any screen's onEnter effects run. */}
+      <Toaster />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/home" element={<Home />} />
@@ -18,7 +20,6 @@ export default function App() {
         <Route path="/dna/s/:token" element={<SharedDna />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      <Toaster />
     </>
   );
 }

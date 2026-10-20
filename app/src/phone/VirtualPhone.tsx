@@ -41,7 +41,7 @@ export function VirtualPhone() {
             <button className="phone-close" onClick={close} aria-label="Close phone">
               <X size={18} />
             </button>
-            <div className="phone" role="dialog" aria-modal="true" aria-label="Your phone">
+            <div className={`phone ${appOpen ? '' : 'phone--home'}`} role="dialog" aria-modal="true" aria-label="Your phone">
               <div className="phone__notch" aria-hidden="true" />
               <div className="phone__status">
                 <span>{formatDate(simDate)}</span>

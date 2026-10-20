@@ -31,7 +31,7 @@ export function DecisionView({ def, screenKey, setReady }: ScreenProps<DecisionS
         {def.options.map((o, i) => (
           <button
             key={o.id}
-            className={`option ${chosen === o.id ? 'option--picked' : ''}`}
+            className={`option ${chosen === o.id ? `option--picked option--picked-${o.tone}` : ''}`}
             onClick={() => choose(o)}
             disabled={!!chosen && chosen !== o.id}
             aria-pressed={chosen === o.id}

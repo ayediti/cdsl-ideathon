@@ -12,7 +12,7 @@ export function ScoreRing({ score, tier, size = 112 }: Props) {
   const offset = c * (1 - Math.max(0, Math.min(100, score)) / 100);
   const mid = size / 2;
   return (
-    <div className={`ring ring--${tier.toLowerCase()}`} style={{ width: size, height: size }}>
+    <div className={`ring ring--${tier.toLowerCase()} ${size < 90 ? 'ring--sm' : ''}`} style={{ width: size, height: size }}>
       <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size} aria-hidden="true">
         <circle className="ring__track" cx={mid} cy={mid} r={r} strokeWidth={stroke} fill="none" />
         <circle
