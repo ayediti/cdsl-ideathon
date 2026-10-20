@@ -1,204 +1,116 @@
-import {
-  ArrowRight,
-  CircleCheck,
-  CircleX,
-  Dna,
-  Gamepad2,
-  MessageSquare,
-  ShieldAlert,
-  ShieldCheck,
-  Siren,
-  Sparkles,
-  Zap,
-} from 'lucide-react';
+import { ArrowRight, BookMarked, Check, GraduationCap, ShieldCheck, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { BRAND } from '../brand';
+import { GAMES } from '../arcade/games';
+import { GAME_ICON, useArcadeStore } from '../arcade/meta';
 import { Logo } from '../components/Logo';
-import { ScoreRing } from '../components/ScoreRing';
-import { ALL_CHAPTERS, screenPath } from '../engine/curriculum';
+import { ALL_CHAPTERS, chapterKey, MODULES, screenPath } from '../engine/curriculum';
 import { useSimStore } from '../engine/simStore';
 
-const FEATURES = [
-  {
-    Icon: Gamepad2,
-    tone: 'brand',
-    title: 'Live it',
-    text: 'Every choice moves your simulated money, your calendar and your financial health score.',
-  },
-  {
-    Icon: Siren,
-    tone: 'coral',
-    title: 'Get scammed — safely',
-    text: 'Fake KYC texts, "bank fraud team" calls and think-like-a-scammer drills, then a red-flag autopsy.',
-  },
-  {
-    Icon: Dna,
-    tone: 'violet',
-    title: 'Know your Money DNA',
-    text: 'Six everyday situations reveal how you decide about money — and what to watch out for.',
-  },
-] as const;
+const AUDIENCE_SHORT = { Students: 'Students', 'First-time investors': 'New investors', 'Senior citizens': 'Seniors' } as const;
 
-const PROMISES = [
-  'Simulated money only — never connects to a real bank, broker or demat account',
-  'Not investment advice',
-  'Never asks for your PAN, Aadhaar, OTP or passwords',
-  'No sign-up — your progress stays in your browser',
-];
+const PROMISES = ['Simulated money only', 'Not investment advice', 'Never asks for PAN, Aadhaar or OTP', 'No sign-up'];
 
+/** One screen: scam games on the side, the course and its syllabus in the middle. */
 export function Landing() {
-  const progress = useSimStore((s) => s.progress);
-  const start = progress ? '/home' : screenPath(ALL_CHAPTERS[0]);
-  const screens = ALL_CHAPTERS.reduce((n, c) => n + c.screenSequence.length, 0);
+  const { progress, completed } = useSimStore();
+  const best = useArcadeStore((s) => s.best);
+  const resume = progress ? `/play/${progress.moduleId}/${progress.chapterId}/${progress.screenId}` : null;
 
   return (
-    <div className="landing">
+    <div className="home">
       <header className="topbar topbar--clear">
         <Logo />
-        <div className="topbar__meta" />
-        <Link to="/library" className="btn btn--ghost btn--sm">
-          Library
-        </Link>
-        <Link to={start} className="btn btn--primary btn--sm">
-          {progress ? 'Continue' : 'Start'}
-        </Link>
+        <nav className="topnav" aria-label="Main">
+          <Link to="/learn">Course map</Link>
+          <Link to="/library">
+            <BookMarked size={16} /> Library
+          </Link>
+        </nav>
       </header>
 
-      <section className="hero">
-        <div className="hero__copy">
-          <span className="pill">
-            <Sparkles size={14} /> A financial life simulator
+      <div className="home__grid">
+        <aside className="home__games" id="games" aria-labelledby="games-title">
+          <div className="home__games-head">
+            <span className="eyebrow">Scam games · 2 min each</span>
+            <h2 id="games-title">Get scammed here, not out there</h2>
+          </div>
+          <ul className="game-list">
+            {GAMES.map((g, i) => {
+              const Icon = GAME_ICON[g.icon];
+              return (
+                <li key={g.id}>
+                  <Link to={`/arcade/${g.id}`} className={`game-row tone-${g.tone}`}>
+                    <span className="game-row__icon">
+                      <Icon size={20} />
+                    </span>
+                    <span className="game-row__text">
+                      <strong>
+                        {g.title}
+                        {i === 0 && <em className="game-row__badge">Start here</em>}
+                      </strong>
+                      <span>{g.audiences.map((a) => AUDIENCE_SHORT[a]).join(' · ')}</span>
+                    </span>
+                    {best[g.id] !== undefined ? <span className="game-row__best mono">{best[g.id]}</span> : <ArrowRight size={16} className="game-row__go" />}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </aside>
+
+        <main className="home__learn">
+          <div className="home__intro">
+            <span className="pill">
+              <Sparkles size={14} /> The deeper dive
+            </span>
+            <h1 className="home__title">Learn about markets, and live them.</h1>
+            <p className="lead">
+              A story-driven simulation with a virtual phone and simulated rupees: from what a share is to your first demat account,
+              your CAS, IPOs and investor scams. Start at the beginning, or jump to any chapter.
+            </p>
+            <div className="home__cta">
+              {resume ? (
+                <Link to={resume} className="btn btn--primary btn--lg">
+                  Continue where I left off <ArrowRight size={18} />
+                </Link>
+              ) : (
+                <Link to={screenPath(ALL_CHAPTERS[0])} className="btn btn--primary btn--lg">
+                  <GraduationCap size={18} /> Start from the beginning
+                </Link>
+              )}
+            </div>
+          </div>
+
+          <ol className="syllabus" aria-label="Chapters">
+            {MODULES.flatMap((m) =>
+              m.chapters.map((c) => {
+                const n = ALL_CHAPTERS.indexOf(c) + 1;
+                const done = completed.includes(chapterKey(c));
+                return (
+                  <li key={chapterKey(c)}>
+                    <Link to={screenPath(c)} className={`syllabus__item ${done ? 'syllabus__item--done' : ''}`}>
+                      <span className="syllabus__num mono">{done ? <Check size={16} /> : String(n).padStart(2, '0')}</span>
+                      <span className="syllabus__text">
+                        <span className="syllabus__module">{m.title}</span>
+                        <strong>{c.title}</strong>
+                        <span className="syllabus__blurb">{c.blurb}</span>
+                      </span>
+                    </Link>
+                  </li>
+                );
+              }),
+            )}
+          </ol>
+        </main>
+      </div>
+
+      <footer className="home__strip">
+        {PROMISES.map((p) => (
+          <span key={p}>
+            <ShieldCheck size={15} /> {p}
           </span>
-          <h1 className="hero__title">
-            Make your money mistakes <span className="marker">here</span>, not out there.
-          </h1>
-          <p className="hero__sub">
-            Open an account, automate your savings and face real scam tactics — with simulated rupees, a simulated phone
-            and zero real risk.
-          </p>
-          <div className="hero__cta">
-            <Link to={start} className="btn btn--primary btn--xl">
-              {progress ? 'Continue your journey' : 'Start the simulation'} <ArrowRight size={20} />
-            </Link>
-            <span className="hero__note">
-              <ShieldCheck size={16} /> No sign-up · No real money
-            </span>
-          </div>
-          <ul className="hero__stats">
-            <li>
-              <strong>{screens}</strong>
-              <span>interactive screens</span>
-            </li>
-            <li>
-              <strong>{ALL_CHAPTERS.length}</strong>
-              <span>chapters</span>
-            </li>
-            <li>
-              <strong>₹0</strong>
-              <span>real money at risk</span>
-            </li>
-          </ul>
-        </div>
-
-        <div className="hero__visual" aria-hidden="true">
-          <div className="mock-phone">
-            <div className="mock-phone__notch" />
-            <div className="mock-phone__screen">
-              <span className="mock-time">10:42</span>
-              <span className="mock-date">Tuesday, 3 June</span>
-              <div className="mock-notif">
-                <div className="mock-notif__head">
-                  <span className="mock-notif__app">
-                    <MessageSquare size={12} />
-                  </span>
-                  NB-NIMBSS <span>now</span>
-                </div>
-                <p>
-                  Your Nimbus Bank KYC <mark>EXPIRES TODAY</mark>. Account will be <mark>BLOCKED in 2 hrs</mark>. Update
-                  now: <mark>nimbus-kyc-verify.co</mark>
-                </p>
-              </div>
-              <div className="mock-choice mock-choice--bad">
-                <CircleX size={18} /> Tap the link
-              </div>
-              <div className="mock-choice mock-choice--good">
-                <CircleCheck size={18} /> Check the official app
-              </div>
-            </div>
-          </div>
-          <div className="float-card float-card--score">
-            <ScoreRing score={82} tier="Strong" size={64} />
-            <div>
-              <span className="label">Health score</span>
-              <strong>Strong</strong>
-            </div>
-          </div>
-          <div className="float-card float-card--loss">
-            <span className="float-card__icon tone-coral">
-              <ShieldAlert size={18} />
-            </span>
-            <div>
-              <strong className="mono">−₹4,000</strong>
-              <span>Lost to phishing</span>
-            </div>
-          </div>
-          <div className="float-card float-card--xp">
-            <Zap size={16} /> +40 XP
-          </div>
-        </div>
-      </section>
-
-      <section className="features">
-        {FEATURES.map(({ Icon, tone, title, text }) => (
-          <div key={title} className="feature">
-            <span className={`feature__icon tone-${tone}`}>
-              <Icon size={24} />
-            </span>
-            <h2>{title}</h2>
-            <p>{text}</p>
-          </div>
         ))}
-      </section>
-
-      <section className="curriculum">
-        <div className="curriculum__head">
-          <span className="eyebrow">The journey</span>
-          <h2 className="display">What you will live through</h2>
-        </div>
-        <ol className="curriculum__list">
-          {ALL_CHAPTERS.map((c, i) => (
-            <li key={c.id}>
-              <span className="curriculum__num mono">{String(i + 1).padStart(2, '0')}</span>
-              <div>
-                <h3>{c.title}</h3>
-                <p>{c.blurb}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section className="trust">
-        <div className="trust__inner">
-          <div>
-            <span className="eyebrow">Safe by design</span>
-            <h2 className="display">A practice ground, not a product.</h2>
-          </div>
-          <ul>
-            {PROMISES.map((p) => (
-              <li key={p}>
-                <ShieldCheck size={20} />
-                <span>{p}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <footer className="footer">
-        <Logo />
-        <span>A simulation for learning. All names, banks and messages are fictional.</span>
-        <span>© {new Date().getFullYear()} {BRAND}</span>
+        <span className="home__strip-alert">Real emergency? Call 1930.</span>
       </footer>
     </div>
   );

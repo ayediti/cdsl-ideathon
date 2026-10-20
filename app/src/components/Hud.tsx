@@ -1,6 +1,6 @@
-import { Banknote, CalendarDays, Landmark, PiggyBank, ShieldAlert, Zap } from 'lucide-react';
+import { Banknote, Briefcase, CalendarDays, Landmark, PiggyBank, ShieldAlert, Zap } from 'lucide-react';
 import { formatDate, inr } from '../engine/dates';
-import { computeFhs, netWorth } from '../engine/fhs';
+import { computeFhs, netWorth, sharesValue } from '../engine/fhs';
 import { useSimStore } from '../engine/simStore';
 import { ScoreRing } from './ScoreRing';
 
@@ -72,6 +72,15 @@ export function Hud() {
           <span>Recurring deposit</span>
           <b className="mono">{inr(sim.rd)}</b>
         </li>
+        {sim.unlockedApps.includes('demat') && (
+          <li>
+            <span className="ico tone-violet">
+              <Briefcase size={16} />
+            </span>
+            <span>Shares (at cost)</span>
+            <b className="mono">{inr(sharesValue(sim))}</b>
+          </li>
+        )}
         {sim.totalLost > 0 && (
           <li className="hud-balances__lost">
             <span className="ico tone-coral">

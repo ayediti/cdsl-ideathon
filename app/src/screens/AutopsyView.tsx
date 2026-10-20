@@ -1,30 +1,8 @@
 import { Eye, MessageSquare, PhoneIncoming, Siren } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import type { AutopsyFlag, AutopsyScreen } from '../engine/types';
+import type { AutopsyScreen } from '../engine/types';
 import type { ScreenProps } from './screenProps';
-
-interface Segment {
-  text: string;
-  flagId?: string;
-}
-
-/** Splits text so each flag snippet becomes its own tappable segment. */
-function segment(text: string, flags: AutopsyFlag[]): Segment[] {
-  const hits = flags
-    .map((f) => ({ id: f.id, start: text.indexOf(f.snippet), length: f.snippet.length }))
-    .filter((h) => h.start >= 0)
-    .sort((a, b) => a.start - b.start);
-  const out: Segment[] = [];
-  let pos = 0;
-  for (const h of hits) {
-    if (h.start < pos) continue;
-    if (h.start > pos) out.push({ text: text.slice(pos, h.start) });
-    out.push({ text: text.slice(h.start, h.start + h.length), flagId: h.id });
-    pos = h.start + h.length;
-  }
-  if (pos < text.length) out.push({ text: text.slice(pos) });
-  return out;
-}
+import { segment } from './segment';
 
 export function AutopsyView({ def, setReady }: ScreenProps<AutopsyScreen>) {
   const [found, setFound] = useState<string[]>([]);

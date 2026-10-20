@@ -1,10 +1,10 @@
-import { ArrowRight, BookMarked, Check, Layers, Lock, PartyPopper, Play, RotateCcw } from 'lucide-react';
+import { ArrowRight, BookMarked, Check, Gamepad2, Layers, PartyPopper, Play, RotateCcw } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { DNA_ICON, DnaCard } from '../components/DnaCard';
 import { Hud } from '../components/Hud';
 import { Logo } from '../components/Logo';
-import { ALL_CHAPTERS, chapterKey, isChapterUnlocked, MODULES, screenPath } from '../engine/curriculum';
+import { ALL_CHAPTERS, chapterKey, MODULES, screenPath } from '../engine/curriculum';
 import { DNA_TYPES } from '../engine/dna';
 import { useSimStore } from '../engine/simStore';
 import { VirtualPhone } from '../phone/VirtualPhone';
@@ -32,8 +32,12 @@ export function Home() {
       <header className="topbar">
         <Logo />
         <div className="topbar__meta">
-          <span className="topbar__module">Your journey</span>
+          <span className="topbar__module">The course</span>
         </div>
+        <Link to="/" className="icon-btn icon-btn--label">
+          <Gamepad2 size={18} />
+          <span>Scam games</span>
+        </Link>
         <Link to="/library" className="icon-btn icon-btn--label">
           <BookMarked size={18} />
           <span>Library</span>
@@ -54,8 +58,8 @@ export function Home() {
 
           <section className="welcome">
             <div className="welcome__text">
-              <span className="eyebrow">Your journey</span>
-              <h1 className="display">{nextUp ? (doneCount ? 'Pick up where you left off' : 'Your money life starts here') : 'All caught up'}</h1>
+              <span className="eyebrow">Learn the markets</span>
+              <h1 className="display">{nextUp ? (doneCount ? 'Pick up where you left off' : 'Your investing life starts here') : 'All caught up'}</h1>
               <p className="lead">
                 {doneCount} of {ALL_CHAPTERS.length} chapters complete
                 {nextUp && (
@@ -96,15 +100,14 @@ export function Home() {
                 {m.chapters.map((c) => {
                   const n = ALL_CHAPTERS.indexOf(c) + 1;
                   const done = completed.includes(chapterKey(c));
-                  const unlocked = isChapterUnlocked(c, completed);
-                  const current = !done && unlocked && c === nextUp;
-                  const status = done ? 'done' : current ? 'current' : unlocked ? 'open' : 'locked';
-                  const label = { done: 'Completed', current: 'Up next', open: 'Ready', locked: 'Locked' }[status];
+                  const current = !done && c === nextUp;
+                  const status = done ? 'done' : current ? 'current' : 'open';
+                  const label = { done: 'Completed', current: 'Up next', open: 'Ready' }[status];
                   const to = current && inProgress ? inProgress : screenPath(c);
                   return (
                     <li key={c.id} className={`path__item is-${status}`}>
                       <span className="path__node" aria-hidden="true">
-                        {done ? <Check size={18} /> : unlocked ? n : <Lock size={15} />}
+                        {done ? <Check size={18} /> : n}
                       </span>
                       <div className="path__card">
                         <div className="path__text">
@@ -115,19 +118,17 @@ export function Home() {
                             <Layers size={14} /> {c.screenSequence.length} screens
                           </span>
                         </div>
-                        {unlocked && (
-                          <Link className={done ? 'btn btn--ghost' : 'btn btn--primary'} to={to}>
-                            {done ? (
-                              <>
-                                <RotateCcw size={16} /> Replay
-                              </>
-                            ) : (
-                              <>
-                                {current && inProgress ? 'Continue' : 'Start'} <ArrowRight size={16} />
-                              </>
-                            )}
-                          </Link>
-                        )}
+                        <Link className={done ? 'btn btn--ghost' : current ? 'btn btn--primary' : 'btn btn--secondary'} to={to}>
+                          {done ? (
+                            <>
+                              <RotateCcw size={16} /> Replay
+                            </>
+                          ) : (
+                            <>
+                              {current && inProgress ? 'Continue' : 'Start'} <ArrowRight size={16} />
+                            </>
+                          )}
+                        </Link>
                       </div>
                     </li>
                   );

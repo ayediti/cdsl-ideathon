@@ -4,14 +4,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { HelpPanel } from '../components/HelpPanel';
 import { Hud } from '../components/Hud';
 import { Logo } from '../components/Logo';
-import {
-  chapterKey,
-  getChapter,
-  getModule,
-  isChapterUnlocked,
-  nextChapter,
-  screenPath,
-} from '../engine/curriculum';
+import { chapterKey, getChapter, getModule, nextChapter, screenPath } from '../engine/curriculum';
 import { useSimStore } from '../engine/simStore';
 import type { Chapter, ScreenDef } from '../engine/types';
 import { VirtualPhone } from '../phone/VirtualPhone';
@@ -21,25 +14,26 @@ import { ScreenView } from '../screens/ScreenView';
 /** /play/:moduleId/:chapterId/:screenId — the core simulator player. */
 export function Player() {
   const { moduleId = '', chapterId = '', screenId = '' } = useParams();
-  const completed = useSimStore((s) => s.completed);
   const [helpOpen, setHelpOpen] = useState(false);
 
   const chapter = getChapter(moduleId, chapterId);
   const def = chapter?.screens[screenId];
   const index = chapter ? chapter.screenSequence.indexOf(screenId) : -1;
   const key = `${moduleId}/${chapterId}/${screenId}`;
-  const allowed = !!chapter && !!def && index >= 0 && isChapterUnlocked(chapter, completed);
+  // Every chapter is open: learners can jump straight to the one they need.
+  const allowed = !!chapter && !!def && index >= 0;
 
   useEffect(() => {
-    if (!allowed || !def) return;
+    if (!allowed || !chapter || !def) return;
     const sim = useSimStore.getState();
     sim.setProgress({ moduleId, chapterId, screenId });
+    if (chapter.entry?.length) sim.apply(chapter.entry, `entry:${chapterKey(chapter)}`);
     if (def.onEnter?.length) sim.apply(def.onEnter, `enter:${key}`);
     setHelpOpen(false);
     window.scrollTo(0, 0);
   }, [key, allowed]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!allowed || !chapter || !def) return <Navigate to="/home" replace />;
+  if (!allowed || !chapter || !def) return <Navigate to="/learn" replace />;
 
   const mod = getModule(moduleId);
   const total = chapter.screenSequence.length;
@@ -47,7 +41,7 @@ export function Player() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <Logo to="/home" />
+        <Logo to="/learn" />
         <div className="topbar__meta">
           <span className="topbar__module">{mod?.title}</span>
           <span className="topbar__chapter">{chapter.title}</span>
@@ -104,7 +98,7 @@ function Stage({ chapter, def, index, screenKey }: StageProps) {
     }
     useSimStore.getState().completeChapter(chapterKey(chapter));
     const next = nextChapter(chapter);
-    navigate('/home', { state: { justCompleted: chapter.title, nextTitle: next?.title } });
+    navigate('/learn', { state: { justCompleted: chapter.title, nextTitle: next?.title } });
   };
 
   return (

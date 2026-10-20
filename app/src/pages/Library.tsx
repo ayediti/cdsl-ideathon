@@ -8,7 +8,7 @@ export function Library() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <Logo to="/home" />
+        <Logo />
         <div className="topbar__meta">
           <span className="topbar__module">Library</span>
         </div>
@@ -45,7 +45,7 @@ export function LibraryArticle() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <Logo to="/home" />
+        <Logo />
         <div className="topbar__meta">
           <Link to="/library" className="topbar__module">
             Library

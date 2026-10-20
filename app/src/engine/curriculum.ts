@@ -1,8 +1,9 @@
 import { orientation } from '../content/m0_orientation';
-import { banking } from '../content/m1_banking';
+import { basics } from '../content/m1_basics';
+import { demat } from '../content/m2_demat';
 import type { Chapter, Module } from './types';
 
-export const MODULES: Module[] = [orientation, banking];
+export const MODULES: Module[] = [orientation, basics, demat];
 export const ALL_CHAPTERS: Chapter[] = MODULES.flatMap((m) => m.chapters);
 
 export const chapterKey = (c: Pick<Chapter, 'moduleId' | 'id'>) => `${c.moduleId}/${c.id}`;
@@ -21,12 +22,6 @@ export function screenPath(c: Chapter, screenId: string = c.screenSequence[0]): 
 
 export function nextChapter(c: Chapter): Chapter | null {
   return ALL_CHAPTERS[ALL_CHAPTERS.indexOf(c) + 1] ?? null;
-}
-
-/** Chapters unlock in order, like FiAlly's journey map. */
-export function isChapterUnlocked(c: Chapter, completed: string[]): boolean {
-  const i = ALL_CHAPTERS.indexOf(c);
-  return i === 0 || completed.includes(chapterKey(ALL_CHAPTERS[i - 1]));
 }
 
 if (import.meta.env.DEV) {

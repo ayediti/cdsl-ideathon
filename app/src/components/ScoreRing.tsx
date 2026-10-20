@@ -2,10 +2,12 @@ interface Props {
   score: number;
   tier: string;
   size?: number;
+  /** Text under the number; defaults to the tier name. */
+  label?: string;
 }
 
-/** Circular gauge for the financial health score. */
-export function ScoreRing({ score, tier, size = 112 }: Props) {
+/** Circular gauge for the financial health score (and arcade game scores). */
+export function ScoreRing({ score, tier, size = 112, label = tier }: Props) {
   const stroke = size > 80 ? 10 : 7;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
@@ -30,7 +32,7 @@ export function ScoreRing({ score, tier, size = 112 }: Props) {
       </svg>
       <div className="ring__label">
         <strong>{score}</strong>
-        <span>{tier}</span>
+        <span>{label}</span>
       </div>
     </div>
   );

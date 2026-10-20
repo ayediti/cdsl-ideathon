@@ -2,8 +2,12 @@ import type { SimData } from './simStore';
 
 export type FhsTier = 'Fragile' | 'Building' | 'Steady' | 'Strong';
 
-export function netWorth(s: Pick<SimData, 'cash' | 'savings' | 'rd'>): number {
-  return s.cash + s.savings + s.rd;
+export function sharesValue(s: Pick<SimData, 'holdings'>): number {
+  return s.holdings.reduce((sum, h) => sum + h.qty * h.price, 0);
+}
+
+export function netWorth(s: Pick<SimData, 'cash' | 'savings' | 'rd' | 'holdings'>): number {
+  return s.cash + s.savings + s.rd + sharesValue(s);
 }
 
 /**

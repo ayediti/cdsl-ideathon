@@ -1,13 +1,14 @@
 import { formatDate, inr } from './dates';
-import { netWorth } from './fhs';
+import { netWorth, sharesValue } from './fhs';
 import type { SimData } from './simStore';
 
-/** Fills {{cash}}, {{savings}}, {{rd}}, {{networth}}, {{date}}, {{lost}}, {{xp}} in content strings. */
+/** Fills {{cash}}, {{savings}}, {{rd}}, {{shares}}, {{networth}}, {{date}}, {{lost}}, {{xp}} in content strings. */
 export function render(text: string, s: SimData): string {
   const values: Record<string, string> = {
     cash: inr(s.cash),
     savings: inr(s.savings),
     rd: inr(s.rd),
+    shares: inr(sharesValue(s)),
     networth: inr(netWorth(s)),
     date: formatDate(s.simDate),
     lost: inr(s.totalLost),

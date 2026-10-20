@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Toaster } from './components/Toaster';
+import { ArcadePage } from './pages/ArcadePage';
 import { Home } from './pages/Home';
 import { Landing } from './pages/Landing';
 import { Library, LibraryArticle } from './pages/Library';
@@ -13,7 +14,9 @@ export default function App() {
       <Toaster />
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/learn" element={<Home />} />
+        <Route path="/home" element={<Navigate to="/learn" replace />} />
+        <Route path="/arcade/:gameId" element={<ArcadePage />} />
         <Route path="/play/:moduleId/:chapterId/:screenId" element={<Player />} />
         <Route path="/library" element={<Library />} />
         <Route path="/library/:slug" element={<LibraryArticle />} />

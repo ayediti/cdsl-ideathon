@@ -1,5 +1,5 @@
 export type AccountId = 'cash' | 'savings' | 'rd';
-export type AppId = 'messages' | 'bank' | 'calculator';
+export type AppId = 'messages' | 'bank' | 'calculator' | 'demat' | 'verify';
 export type FlagValue = string | number | boolean;
 
 export interface Txn {
@@ -34,6 +34,26 @@ export interface Message {
   suspicious?: boolean;
 }
 
+/** Shares of a (fictional) company held in the simulated demat account. */
+export interface Holding {
+  symbol: string;
+  name: string;
+  qty: number;
+  price: number;
+}
+
+/** A line in the demat account's statement (what the CAS shows). */
+export interface DematTxn {
+  id: string;
+  date: string;
+  type: 'credit' | 'debit';
+  symbol: string;
+  qty: number;
+  description: string;
+  /** Not done by the player: the CAS task asks them to spot it. */
+  unauthorised?: boolean;
+}
+
 export type DnaType = 'P' | 'A' | 'G' | 'S';
 
 export interface DnaResult {
@@ -53,7 +73,13 @@ export type Effect =
   | { type: 'message'; thread: string; from: string; text: string; suspicious?: boolean }
   | { type: 'advanceDays'; days: number }
   | { type: 'startRd'; label: string; amount: number; annualRate: number; months: number }
-  | { type: 'flag'; key: string; value: FlagValue };
+  | { type: 'flag'; key: string; value: FlagValue }
+  | { type: 'buyShares'; symbol: string; name: string; qty: number; price: number; broker: string }
+  | { type: 'dematDebit'; symbol: string; qty: number | 'all'; description: string }
+  /** Tops savings up to `amount` if lower: lets a chapter be played directly, out of order. */
+  | { type: 'ensureSavings'; amount: number }
+  /** Adds the holding (without a bank debit) if the player has never held this symbol. */
+  | { type: 'ensureShares'; symbol: string; name: string; qty: number; price: number; broker: string };
 
 export interface LibraryLink {
   label: string;
@@ -139,7 +165,31 @@ export interface SummaryScreen extends BaseScreen {
 
 export interface CustomScreen extends BaseScreen {
   kind: 'custom';
-  component: 'dnaQuiz' | 'dnaResult';
+  component: 'dnaQuiz' | 'dnaResult' | 'priceLab' | 'compoundLab';
+  intro?: string;
+}
+
+/** Teach: tap each card to reveal it. Continue unlocks once every card has been opened. */
+export interface ExploreScreen extends BaseScreen {
+  kind: 'explore';
+  intro: string;
+  cards: { id: string; label: string; hint?: string; body: string }[];
+  callout?: string;
+}
+
+/** Teach: put each item into the right bucket, with instant feedback. */
+export interface SortScreen extends BaseScreen {
+  kind: 'sort';
+  intro: string;
+  buckets: { id: string; label: string }[];
+  items: { id: string; label: string; bucket: string; why: string }[];
+}
+
+/** Teach: tap steps in the right order. `steps` is the correct order; they are shown shuffled. */
+export interface OrderScreen extends BaseScreen {
+  kind: 'order';
+  intro: string;
+  steps: { id: string; label: string; detail: string }[];
 }
 
 export type ScreenDef =
@@ -149,13 +199,18 @@ export type ScreenDef =
   | QuizScreen
   | PhoneTaskScreen
   | SummaryScreen
-  | CustomScreen;
+  | CustomScreen
+  | ExploreScreen
+  | SortScreen
+  | OrderScreen;
 
 export interface Chapter {
   id: string;
   moduleId: string;
   title: string;
   blurb: string;
+  /** Applied once when the chapter is first opened, so it works even when played out of order. */
+  entry?: Effect[];
   screenSequence: string[];
   screens: Record<string, ScreenDef>;
 }

@@ -5,8 +5,10 @@ import { useSimStore } from '../engine/simStore';
 import { APP_META } from './apps';
 import { BankApp } from './BankApp';
 import { CalculatorApp } from './CalculatorApp';
+import { DematApp } from './DematApp';
 import { MessagesApp } from './MessagesApp';
 import { usePhoneUi } from './phoneUi';
+import { VerifyApp } from './VerifyApp';
 
 export function VirtualPhone() {
   const { open, app, openTo, close } = usePhoneUi();
@@ -90,6 +92,8 @@ export function VirtualPhone() {
                 {appOpen && app === 'messages' && <MessagesApp />}
                 {appOpen && app === 'bank' && <BankApp />}
                 {appOpen && app === 'calculator' && <CalculatorApp />}
+                {appOpen && app === 'demat' && <DematApp />}
+                {appOpen && app === 'verify' && <VerifyApp />}
               </div>
 
               <button className="phone__homebar" onClick={() => openTo(null)} aria-label="Go to home screen" />

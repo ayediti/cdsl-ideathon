@@ -1,4 +1,17 @@
-import { BookOpen, CircleHelp, Dna, SearchCheck, Smartphone, Split, Trophy, type LucideIcon } from 'lucide-react';
+import {
+  BookOpen,
+  CircleHelp,
+  Dna,
+  FlaskConical,
+  ListOrdered,
+  MousePointerClick,
+  SearchCheck,
+  Shapes,
+  Smartphone,
+  Split,
+  Trophy,
+  type LucideIcon,
+} from 'lucide-react';
 import { inr } from '../engine/dates';
 import type { Effect, ScreenDef } from '../engine/types';
 
@@ -19,7 +32,15 @@ export function kindMeta(def: ScreenDef): { label: string; Icon: LucideIcon; ton
     case 'summary':
       return { label: 'Chapter recap', Icon: Trophy, tone: 'sun' };
     case 'custom':
-      return { label: 'Money DNA', Icon: Dna, tone: 'violet' };
+      return def.component === 'priceLab' || def.component === 'compoundLab'
+        ? { label: 'Try it', Icon: FlaskConical, tone: 'brand' }
+        : { label: 'Money DNA', Icon: Dna, tone: 'violet' };
+    case 'explore':
+      return { label: 'Explore', Icon: MousePointerClick, tone: 'sky' };
+    case 'sort':
+      return { label: 'Sort it out', Icon: Shapes, tone: 'brand' };
+    case 'order':
+      return { label: 'Put it in order', Icon: ListOrdered, tone: 'sky' };
   }
 }
 
@@ -37,6 +58,8 @@ export function effectChips(effects: Effect[] = []): Chip[] {
     else if (e.type === 'credit') chips.push({ text: `+${inr(e.amount)}`, tone: 'good' });
     else if (e.type === 'xp') chips.push({ text: `+${e.amount} XP`, tone: 'good' });
     else if (e.type === 'startRd') chips.push({ text: `RD ${inr(e.amount)}/month started`, tone: 'neutral' });
+    else if (e.type === 'buyShares') chips.push({ text: `+${e.qty} ${e.symbol} shares`, tone: 'neutral' });
+    else if (e.type === 'dematDebit') chips.push({ text: `${e.symbol} shares taken`, tone: 'bad' });
   }
   return chips;
 }

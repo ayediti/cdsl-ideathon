@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { addDays, addMonths } from './dates';
-import type { AccountId, AppId, DnaResult, Effect, FlagValue, Mandate, Message, Txn } from './types';
+import type { AccountId, AppId, DematTxn, DnaResult, Effect, FlagValue, Holding, Mandate, Message, Txn } from './types';
 
 export interface Progress {
   moduleId: string;
@@ -21,6 +21,8 @@ export interface SimData {
   transactions: Txn[];
   mandates: Mandate[];
   messages: Message[];
+  holdings: Holding[];
+  dematTxns: DematTxn[];
   flags: Record<string, FlagValue>;
   completed: string[];
   progress: Progress | null;
@@ -47,10 +49,12 @@ const initialData: SimData = {
   rd: 0,
   xp: 0,
   totalLost: 0,
-  unlockedApps: ['messages'],
+  unlockedApps: ['messages', 'bank'],
   transactions: [],
   mandates: [],
   messages: [],
+  holdings: [],
+  dematTxns: [],
   flags: {},
   completed: [],
   progress: null,
@@ -229,7 +233,61 @@ export function reduce(s: SimData, e: Effect): SimData {
     }
     case 'flag':
       return { ...s, flags: { ...s.flags, [e.key]: e.value } };
+    case 'buyShares': {
+      const cost = e.qty * e.price;
+      const description = `Bought ${e.qty} ${e.symbol} @ ₹${e.price} via ${e.broker}`;
+      if (s.savings < cost) {
+        return addTxn(s, { type: 'debit', account: 'savings', amount: cost, description, counterparty: e.broker, status: 'failed' });
+      }
+      const held = s.holdings.find((h) => h.symbol === e.symbol);
+      const holdings = held
+        ? s.holdings.map((h) =>
+            h === held ? { ...h, qty: h.qty + e.qty, price: (h.qty * h.price + cost) / (h.qty + e.qty) } : h,
+          )
+        : [...s.holdings, { symbol: e.symbol, name: e.name, qty: e.qty, price: e.price }];
+      const next = addTxn(withBalance(s, 'savings', s.savings - cost), {
+        type: 'debit',
+        account: 'savings',
+        amount: cost,
+        description,
+        counterparty: e.broker,
+        status: 'success',
+      });
+      return addDematTxn({ ...next, holdings }, { type: 'credit', symbol: e.symbol, qty: e.qty, description: `Purchase settled · ${e.broker}` });
+    }
+    case 'dematDebit': {
+      const held = s.holdings.find((h) => h.symbol === e.symbol);
+      if (!held) return s;
+      const qty = e.qty === 'all' ? held.qty : Math.min(e.qty, held.qty);
+      if (qty <= 0) return s;
+      const holdings = s.holdings.map((h) => (h === held ? { ...h, qty: h.qty - qty } : h)).filter((h) => h.qty > 0);
+      return addDematTxn(
+        { ...s, holdings, totalLost: s.totalLost + Math.round(qty * held.price) },
+        { type: 'debit', symbol: e.symbol, qty, description: e.description, unauthorised: true },
+      );
+    }
+    case 'ensureSavings': {
+      if (s.savings >= e.amount) return s;
+      return reduce(s, {
+        type: 'credit',
+        account: 'savings',
+        amount: e.amount - s.savings,
+        description: 'Savings so far',
+        counterparty: 'Brightleaf Studio',
+      });
+    }
+    case 'ensureShares': {
+      if (s.dematTxns.some((t) => t.symbol === e.symbol)) return s;
+      return addDematTxn(
+        { ...s, holdings: [...s.holdings, { symbol: e.symbol, name: e.name, qty: e.qty, price: e.price }] },
+        { type: 'credit', symbol: e.symbol, qty: e.qty, description: `Purchase settled · ${e.broker}` },
+      );
+    }
   }
+}
+
+function addDematTxn(s: SimData, t: Omit<DematTxn, 'id' | 'date'>): SimData {
+  return { ...s, dematTxns: [{ ...t, id: uid(), date: s.simDate }, ...s.dematTxns] };
 }
 
 function pickData(s: SimData): SimData {
@@ -244,6 +302,8 @@ function pickData(s: SimData): SimData {
     transactions: s.transactions,
     mandates: s.mandates,
     messages: s.messages,
+    holdings: s.holdings,
+    dematTxns: s.dematTxns,
     flags: s.flags,
     completed: s.completed,
     progress: s.progress,
@@ -276,6 +336,7 @@ export const useSimStore = create<SimData & SimActions>()(
       setDna: (dna) => set({ dna }),
       reset: () => set({ ...initialData }),
     }),
-    { name: 'finsim-state-v1', partialize: (s: SimData & SimActions) => pickData(s) },
+    // v2: added holdings + dematTxns; a fresh key avoids loading v1 state that lacks them.
+    { name: 'finsim-state-v2', partialize: (s: SimData & SimActions) => pickData(s) },
   ),
 );

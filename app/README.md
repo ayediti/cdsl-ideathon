@@ -1,8 +1,23 @@
 # FinSim (working title)
 
-A rebuild of FiAlly's architecture: a narrative financial-life simulator with simulated money, a virtual phone, decisions with consequences, scam "autopsies", a Money DNA quiz and a financial health score.
+An entry for the CDSL Reimagine Ideathon: financial awareness and cyber safety for students, first-time investors and senior citizens. Two entry points:
 
-The mechanics follow the teardown in [`../fially_teardown.md`](../fially_teardown.md). All story text, characters and branding are original placeholders, ready to replace.
+- **Scam games** (`/arcade/:gameId`): five standalone, shareable two-minute games, plus the "golden hour" game on the landing page. They hook people in.
+- **The course** (`/learn`, `/play/...`): a story-driven simulation with simulated money and a virtual phone, covering shares, demat accounts, the CAS, IPOs and investor scams. It teaches in depth.
+
+The course engine follows the FiAlly teardown in [`../fially_teardown.md`](../fially_teardown.md). All companies, apps, people and messages are fictional.
+
+## Scam games
+
+Each game is pure data in [`src/arcade/games.ts`](src/arcade/games.ts), played by one of three generic players:
+
+| kind | Player | Used by |
+|---|---|---|
+| `chat` | [`ChatPlayer`](src/arcade/ChatPlayer.tsx): branching video call, phone call or group chat | The Digital Arrest, The Pension Call, The Tip Group |
+| `realOrFake` | [`RealOrFakePlayer`](src/arcade/RealOrFakePlayer.tsx): judge each card | Real or Deepfake? |
+| `flagRush` | [`FlagRushPlayer`](src/arcade/FlagRushPlayer.tsx): timed hunt for hidden red flags | Red Flag Rush |
+
+Every game ends in [`GameEnd`](src/arcade/GameEnd.tsx): a score, item-by-item review, red flags, "if this happens for real" steps and a share bar. Share links carry only the game id. The landing page's [`GoldenHour`](src/arcade/GoldenHour.tsx) teaches what to do in the first hour after a scam.
 
 ## Run
 
@@ -34,18 +49,25 @@ npm run build      # type-check + production build into dist/
 | kind | Use for | Continue unlocks when |
 |---|---|---|
 | `narrative` | Story beats, explanations | immediately |
+| `explore` | Teach: tap cards to reveal each idea | every card opened |
+| `sort` | Teach: put items into buckets, with instant feedback | every item sorted |
+| `order` | Teach: tap steps in the right sequence | all steps placed |
 | `decision` | A choice with consequences (`effects`) | an option is picked (locked after) |
 | `autopsy` | Tap the red flags in a scam message/call | all flags found |
 | `quiz` | Knowledge checks (+10 XP per correct) | all answered |
 | `phoneTask` | "Go do X on your phone" | `doneFlag` is set by a phone app |
 | `summary` | Chapter recap | immediately |
-| `custom` | Bespoke React screens (`dnaQuiz`, `dnaResult`) | the component calls `setReady` |
+| `custom` | Bespoke React screens (`dnaQuiz`, `dnaResult`, `priceLab`, `compoundLab`) | the component calls `setReady` |
 
-Text can use `{{cash}} {{savings}} {{rd}} {{networth}} {{date}} {{lost}} {{xp}}`.
+Every chapter teaches with `explore` / `sort` / `order` / a lab before its `quiz`.
+
+Text can use `{{cash}} {{savings}} {{rd}} {{shares}} {{networth}} {{date}} {{lost}} {{xp}}`.
 
 ## Effects (what a screen can do to the simulation)
 
-`credit`, `debit`, `transfer`, `scamLoss`, `xp`, `unlockApp`, `message`, `advanceDays`, `startRd`, `flag`. All are defined in `types.ts` and applied in `reduce()` in `simStore.ts`. `onEnter` effects run once per screen, even across reloads and replays.
+`credit`, `debit`, `transfer`, `scamLoss`, `xp`, `unlockApp`, `message`, `advanceDays`, `startRd`, `flag`, `buyShares`, `dematDebit`, `ensureSavings`, `ensureShares`. All are defined in `types.ts` and applied in `reduce()` in `simStore.ts`. `onEnter` effects run once per screen, even across reloads and replays. `dematDebit` marks the line as unauthorised, so the Demat app's CAS view can ask the player to spot it.
+
+Phone apps: Messages, Bank, Calculator, **Demat** (holdings + CAS statement) and **Verify** (a simulated SEBI registration lookup over the fictional entities in [`src/phone/registry.ts`](src/phone/registry.ts)).
 
 ## Add a chapter
 
@@ -53,10 +75,10 @@ Text can use `{{cash}} {{savings}} {{rd}} {{networth}} {{date}} {{lost}} {{xp}}`
 2. List its screen ids in `screenSequence` and define each one in `screens`.
 3. Optional: add library articles as `src/content/library/<slug>.md` and link them via `help.links`.
 
-Chapters unlock in order. In dev mode, a missing screen id or autopsy snippet logs an error in the console.
+Every chapter is open, so learners can jump straight to the one they need. If a chapter depends on earlier ones (savings, shares in the demat account), give it an `entry` list of `ensure*` effects: they run once when the chapter is opened and do nothing if the player already has what is needed. In dev mode, a missing screen id or autopsy snippet logs an error in the console.
 
-## Not replicated (yet)
+## Not built yet
 
-- Supabase auth and server storage (everything is local; swap `persist` storage for a Supabase adapter).
-- FiAlly's remaining chapters (payment methods, inflation, compounding deep-dive, statement fraud, payslip, behavioural biases, budgeting).
-- School / principal research flows and the beta waitlist.
+- Inclusion: regional languages, large-text mode, read-aloud, lite mode.
+- A refreshed Money DNA quiz.
+- Server storage (everything is local; swap `persist` storage for a backend adapter).
