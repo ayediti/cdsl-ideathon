@@ -1,5 +1,5 @@
 % FinSim -- CDSL Reimagine Ideathon, Screening Round entry
-% Compile with pdfLaTeX on Overleaf. Upload all .png files from this folder next to this file.
+% Compile with pdfLaTeX on Overleaf. Upload all .png files from this folder next to this file (qr.png is the site's QR code).
 % A missing image is replaced by a labelled placeholder box, so the document compiles either way.
 % Target: exactly 3 full pages. Tune with \figh below: lower it (e.g. 3.4cm) if it spills onto page 4,
 % raise it (e.g. 4.3cm) if page 3 has empty space. Every image is a real screenshot of the FinSim prototype.
@@ -19,8 +19,6 @@
 \usepackage{titlesec}
 \usepackage[font=footnotesize,labelfont=bf,skip=2pt]{caption}
 \usepackage[hidelinks]{hyperref}
-\usepackage{qrcode} % QR code in the "Try the Prototype" section; delete that line and the \qrcode call if it ever fails to load
-
 % ---- Colours taken from the prototype ------------------------------------------
 \definecolor{brand}{HTML}{0E6B57}
 \definecolor{coral}{HTML}{D9472F}
@@ -368,12 +366,12 @@ The working prototype is live. It needs no sign-up and no install, and it runs i
 \par\smallskip\noindent
 \begin{minipage}[c]{0.63\columnwidth}\raggedright
 \textbf{Website:}\\[1pt]
-\href{https://dukenukem1611.github.io/cdsl-ideathon/}{\textcolor{brand}{\texttt{dukenukem1611.github.io/cdsl-ideathon}}}\\[4pt]
+\href{https://ayediti.github.io/cdsl-ideathon/}{\textcolor{brand}{\texttt{ayediti.github.io/cdsl-ideathon}}}\\[4pt]
 \textbf{A 60-second tour:} (1) tap \emph{The Digital Arrest} and play it; (2) switch the site to Hindi with the button at the top;
 (3) read the debrief at the end; (4) open \emph{Self-check} and take the before test.
 \end{minipage}\hfill
 \begin{minipage}[c]{0.33\columnwidth}\centering
-\qrcode[height=2.3cm]{https://dukenukem1611.github.io/cdsl-ideathon/}\\[1pt]{\scriptsize Scan to open}
+\shot{qr.png}{2.3cm}{2.3cm}\\[1pt]{\scriptsize Scan to open}
 \end{minipage}
 \par\smallskip
 
