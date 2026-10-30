@@ -2,6 +2,7 @@ import { ArrowRight, ChevronLeft, Flag, LifeBuoy } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { HelpPanel } from '../components/HelpPanel';
+import { AccessControls } from '../components/AccessControls';
 import { Hud } from '../components/Hud';
 import { Logo } from '../components/Logo';
 import { chapterKey, getChapter, getModule, nextChapter, screenPath } from '../engine/curriculum';
@@ -46,6 +47,7 @@ export function Player() {
           <span className="topbar__module">{mod?.title}</span>
           <span className="topbar__chapter">{chapter.title}</span>
         </div>
+        <AccessControls />
         <button className="icon-btn icon-btn--label" onClick={() => setHelpOpen(true)}>
           <LifeBuoy size={18} />
           <span>Help</span>
@@ -98,7 +100,7 @@ function Stage({ chapter, def, index, screenKey }: StageProps) {
     }
     useSimStore.getState().completeChapter(chapterKey(chapter));
     const next = nextChapter(chapter);
-    navigate('/learn', { state: { justCompleted: chapter.title, nextTitle: next?.title } });
+    navigate('/learn', { state: { justCompleted: chapter.title, completedKey: chapterKey(chapter), nextTitle: next?.title } });
   };
 
   return (

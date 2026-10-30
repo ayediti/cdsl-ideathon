@@ -1,18 +1,17 @@
 import { ArrowRight, BookMarked, Check, Gamepad2, Layers, PartyPopper, Play, RotateCcw } from 'lucide-react';
-import type { CSSProperties } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { DNA_ICON, DnaCard } from '../components/DnaCard';
+import { DnaCard } from '../components/DnaCard';
+import { AccessControls } from '../components/AccessControls';
 import { Hud } from '../components/Hud';
 import { Logo } from '../components/Logo';
 import { ALL_CHAPTERS, chapterKey, MODULES, screenPath } from '../engine/curriculum';
-import { DNA_TYPES } from '../engine/dna';
 import { useSimStore } from '../engine/simStore';
 import { VirtualPhone } from '../phone/VirtualPhone';
 
 /** Journey map: every chapter, its status, and a resume button. */
 export function Home() {
   const { completed, progress, dna, reset } = useSimStore();
-  const state = useLocation().state as { justCompleted?: string; nextTitle?: string } | null;
+  const state = useLocation().state as { justCompleted?: string; completedKey?: string; nextTitle?: string } | null;
 
   const doneCount = ALL_CHAPTERS.filter((c) => completed.includes(chapterKey(c))).length;
   const nextUp = ALL_CHAPTERS.find((c) => !completed.includes(chapterKey(c)));
@@ -21,7 +20,6 @@ export function Home() {
       ? `/play/${progress.moduleId}/${progress.chapterId}/${progress.screenId}`
       : null;
   const ctaPath = inProgress ?? (nextUp ? screenPath(nextUp) : null);
-  const DnaIcon = dna ? DNA_ICON[dna.dominant] : null;
 
   const onReset = () => {
     if (window.confirm('Reset all progress and start the simulation again?')) reset();
@@ -34,6 +32,7 @@ export function Home() {
         <div className="topbar__meta">
           <span className="topbar__module">The course</span>
         </div>
+        <AccessControls />
         <Link to="/" className="icon-btn icon-btn--label">
           <Gamepad2 size={18} />
           <span>Scam games</span>
@@ -50,10 +49,27 @@ export function Home() {
             <div className="banner" role="status">
               <PartyPopper size={22} />
               <span>
-                <strong>Chapter complete: {state.justCompleted}.</strong>
+                <strong>
+                  Chapter complete: {state.justCompleted}
+                  {/[.?!]$/.test(state.justCompleted) ? '' : '.'}
+                </strong>
                 {state.nextTitle ? ` Next up: ${state.nextTitle}.` : ' You have finished everything available so far.'}
               </span>
             </div>
+          )}
+
+          {/* The Money DNA result is shown once, right after the chapter that produces it. */}
+          {dna && state?.completedKey === chapterKey(ALL_CHAPTERS[0]) && (
+            <section className="module">
+              <div className="module__head">
+                <span className="module__num mono">★</span>
+                <div>
+                  <h2>Your Money DNA</h2>
+                  <p>How you tend to decide about money.</p>
+                </div>
+              </div>
+              <DnaCard result={dna} />
+            </section>
           )}
 
           <section className="welcome">
@@ -77,11 +93,6 @@ export function Home() {
                   <Link to={ctaPath} className="btn btn--primary btn--lg">
                     <Play size={18} /> {inProgress ? 'Resume' : doneCount ? 'Start next chapter' : 'Start'}
                   </Link>
-                )}
-                {dna && DnaIcon && (
-                  <span className="dna-chip" style={{ '--dna': DNA_TYPES[dna.dominant].color } as CSSProperties}>
-                    <DnaIcon size={16} /> {DNA_TYPES[dna.dominant].name}
-                  </span>
                 )}
               </div>
             </div>
@@ -136,19 +147,6 @@ export function Home() {
               </ol>
             </section>
           ))}
-
-          {dna && (
-            <section className="module">
-              <div className="module__head">
-                <span className="module__num mono">★</span>
-                <div>
-                  <h2>Your Money DNA</h2>
-                  <p>How you tend to decide about money.</p>
-                </div>
-              </div>
-              <DnaCard result={dna} />
-            </section>
-          )}
 
           <button className="link-button link-button--danger" onClick={onReset}>
             <RotateCcw size={15} /> Reset simulation

@@ -9,7 +9,9 @@ import { getGame } from '../arcade/games';
 import { GAME_ICON, useArcadeStore } from '../arcade/meta';
 import { RealOrFakePlayer } from '../arcade/RealOrFakePlayer';
 import type { ArcadeGame, GameResult } from '../arcade/types';
+import { AccessControls } from '../components/AccessControls';
 import { Logo } from '../components/Logo';
+import { useReadAloud, useT } from '../i18n/t';
 
 /** /arcade/:gameId — one bite-sized, shareable scam game. */
 export function ArcadePage() {
@@ -36,6 +38,7 @@ export function ArcadePage() {
     [gameId, record],
   );
 
+  const t = useT();
   if (!game) return <Navigate to="/" replace />;
 
   const play = () => {
@@ -49,12 +52,13 @@ export function ArcadePage() {
       <header className="topbar">
         <Logo />
         <div className="topbar__meta">
-          <span className="topbar__module">Scam games</span>
-          <span className="topbar__chapter">{game.title}</span>
+          <span className="topbar__module">{t('Scam games')}</span>
+          <span className="topbar__chapter">{t(game.title)}</span>
         </div>
+        <AccessControls />
         <Link to="/" className="icon-btn icon-btn--label">
           <Gamepad2 size={18} />
-          <span>All games</span>
+          <span>{t('All games')}</span>
         </Link>
       </header>
 
@@ -77,27 +81,29 @@ export function ArcadePage() {
 function GameIntro({ game, onStart }: { game: ArcadeGame; onStart: () => void }) {
   const Icon = GAME_ICON[game.icon];
   const best = useArcadeStore((s) => s.best[game.id]);
+  const t = useT();
+  useReadAloud(`${t(game.title)}. ${t(game.tagline)}`);
   return (
     <div className={`game-intro tone-${game.tone}`}>
       <span className="game-intro__icon">
         <Icon size={34} />
       </span>
       <span className="eyebrow">
-        <Clock size={13} /> {game.minutes} min · scam game
+        <Clock size={13} /> {t('{n} min · scam game', { n: game.minutes })}
       </span>
-      <h1 className="display">{game.title}</h1>
-      <p className="lead">{game.tagline}</p>
+      <h1 className="display">{t(game.title)}</h1>
+      <p className="lead">{t(game.tagline)}</p>
       <ul className="audience-chips" aria-label="Made for">
         {game.audiences.map((a) => (
-          <li key={a}>{a}</li>
+          <li key={a}>{t(a)}</li>
         ))}
       </ul>
       <button className="btn btn--primary btn--xl" onClick={onStart}>
-        Play <ArrowRight size={20} />
+        {t('Play')} <ArrowRight size={20} />
       </button>
-      {best !== undefined && <p className="hint">Your best: {best}/100</p>}
+      {best !== undefined && <p className="hint">{t('Your best: {n}/100', { n: best })}</p>}
       <p className="game-intro__note">
-        <ShieldCheck size={16} /> Everything is simulated. No real money, no sign-up, nothing about you is collected.
+        <ShieldCheck size={16} /> {t('Everything is simulated. No real money, no sign-up, nothing about you is collected.')}
       </p>
     </div>
   );

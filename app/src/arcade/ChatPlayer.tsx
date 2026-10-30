@@ -1,5 +1,6 @@
 import { PhoneCall, ShieldCheck, TrendingDown, TrendingUp, UserRound, Users, Video } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useReadAloud, useT } from '../i18n/t';
 import { clampScore, prefersReducedMotion } from './meta';
 import type { ChatChoice, ChatGame, ChatLine, GameResult } from './types';
 
@@ -33,13 +34,22 @@ export function ChatPlayer({ game, onFinish }: Props) {
   const current = game.nodes[path[path.length - 1].node];
   const settled = shown >= lines.length;
   const ticker = [...path].reverse().map((s) => game.nodes[s.node].ticker).find(Boolean);
+  const t = useT();
+
+  // Read-aloud: each new line from the other side, then the reply options once they appear.
+  const lastThem = lines
+    .slice(0, shown)
+    .filter((l) => l.from !== 'me')
+    .pop();
+  useReadAloud(lastThem ? `${lastThem.from === 'system' ? '' : `${t(lastThem.from)}: `}${t(lastThem.text)}` : null);
+  useReadAloud(settled && current.choices ? current.choices.map((c, i) => `${LETTERS[i]}. ${t(c.label)}`).join('. ') : null);
 
   useEffect(() => {
     if (settled) return;
     const next = lines[shown];
     const delay = next.from === 'me' || reduced ? 150 : Math.min(1600, 500 + next.text.length * 12);
-    const t = setTimeout(() => setShown((n) => n + 1), delay);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setShown((n) => n + 1), delay);
+    return () => clearTimeout(timer);
   }, [shown, settled, lines, reduced]);
 
   useEffect(() => {
@@ -51,22 +61,22 @@ export function ChatPlayer({ game, onFinish }: Props) {
     const choices = path.flatMap((s) => (s.choice ? [s.choice] : []));
     const score = clampScore(100 + choices.reduce((sum, c) => sum + c.points, 0));
     const end = current.end;
-    const t = setTimeout(
+    const timer = setTimeout(
       () =>
         onFinish({
           score: end.outcome === 'lost' ? Math.min(score, 30) : score,
           outcome: end.outcome,
-          title: end.title,
-          text: end.text,
+          title: t(end.title),
+          text: t(end.text),
           review: {
-            title: 'Your choices',
-            items: choices.map((c) => ({ label: c.label, note: c.note, good: c.points >= 0 })),
+            title: t('Your choices'),
+            items: choices.map((c) => ({ label: t(c.label), note: t(c.note), good: c.points >= 0 })),
           },
         }),
       reduced ? 300 : 1400,
     );
-    return () => clearTimeout(t);
-  }, [settled, current, path, onFinish, reduced]);
+    return () => clearTimeout(timer);
+  }, [settled, current, path, onFinish, reduced, t]);
 
   const choose = (choice: ChatChoice) => {
     setPath((p) => [...p.slice(0, -1), { ...p[p.length - 1], choice }, { node: choice.next }]);
@@ -82,8 +92,8 @@ export function ChatPlayer({ game, onFinish }: Props) {
           <HeadIcon size={20} />
         </span>
         <div className="chat__who">
-          <strong>{game.contact.name}</strong>
-          <span>{game.contact.detail}</span>
+          <strong>{t(game.contact.name)}</strong>
+          <span>{t(game.contact.detail)}</span>
         </div>
         {ticker && (
           <span className={`ticker ${ticker.change.startsWith('−') ? 'ticker--down' : 'ticker--up'}`}>
@@ -107,12 +117,12 @@ export function ChatPlayer({ game, onFinish }: Props) {
         {lines.slice(0, shown).map((l, i) =>
           l.from === 'system' ? (
             <p key={i} className="chat__system">
-              {l.text}
+              {t(l.text)}
             </p>
           ) : (
             <div key={i} className={`bubble ${l.from === 'me' ? 'bubble--me' : 'bubble--them'}`}>
-              {l.from !== 'me' && <span className="bubble__from">{l.from}</span>}
-              {l.text}
+              {l.from !== 'me' && <span className="bubble__from">{t(l.from)}</span>}
+              {t(l.text)}
             </div>
           ),
         )}
@@ -132,7 +142,7 @@ export function ChatPlayer({ game, onFinish }: Props) {
             <button key={c.label} className="option" onClick={() => choose(c)}>
               <span className="option__letter">{LETTERS[i]}</span>
               <span className="option__text">
-                <span className="option__label">{c.label}</span>
+                <span className="option__label">{t(c.label)}</span>
               </span>
             </button>
           ))}

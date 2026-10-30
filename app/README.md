@@ -77,8 +77,17 @@ Phone apps: Messages, Bank, Calculator, **Demat** (holdings + CAS statement) and
 
 Every chapter is open, so learners can jump straight to the one they need. If a chapter depends on earlier ones (savings, shares in the demat account), give it an `entry` list of `ensure*` effects: they run once when the chapter is opened and do nothing if the player already has what is needed. In dev mode, a missing screen id or autopsy snippet logs an error in the console.
 
+## Language, read-aloud, large text, self-check
+
+- **Hindi:** `src/i18n/hi.ts` maps each English string to Hindi; `useT()` translates at render and falls back to English. The home page, all games and the self-check are covered. In Red Flag Rush, each translated snippet must appear verbatim in its translated message.
+- **Read-aloud:** `useReadAloud(text)` speaks new text with the browser's voice when the switch is on.
+- **Large text:** a root font-size switch (`html[data-size='large']`).
+- **Self-check** (`/check`): two equivalent six-item sets, taken before and after playing; scores stay in the browser.
+
+The switches live in `AccessControls` and are saved per browser.
+
 ## Not built yet
 
-- Inclusion: regional languages, large-text mode, read-aloud, lite mode.
+- Hindi for the course chapters and library; more regional languages; lite mode.
 - A refreshed Money DNA quiz.
 - Server storage (everything is local; swap `persist` storage for a backend adapter).

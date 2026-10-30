@@ -2,6 +2,7 @@ import { Lightbulb } from 'lucide-react';
 import { useSimStore } from '../engine/simStore';
 import { render } from '../engine/template';
 import type { NarrativeScreen } from '../engine/types';
+import { useReadAloud } from '../i18n/t';
 import type { ScreenProps } from './screenProps';
 
 type Block = { type: 'p'; text: string } | { type: 'steps'; items: string[] };
@@ -22,6 +23,8 @@ function toBlocks(body: string[]): Block[] {
 export function NarrativeView({ def }: ScreenProps<NarrativeScreen>) {
   const sim = useSimStore();
   const [name, role] = def.speaker?.split(', ') ?? [];
+  // Course chapters are English for now, so they are read in the English voice.
+  useReadAloud([def.title, ...def.body.map((p) => render(p, sim))].join('. '), 'en');
   return (
     <article className="screen">
       {name && (

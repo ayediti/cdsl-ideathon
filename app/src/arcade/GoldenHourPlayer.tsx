@@ -1,6 +1,7 @@
 import { AlarmClock, Check, Siren } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { inr } from '../engine/dates';
+import { useReadAloud, useT } from '../i18n/t';
 import { clampScore } from './meta';
 import type { GameResult, GoldenHourGame } from './types';
 
@@ -109,6 +110,7 @@ interface Props {
 
 /** You have just been scammed: spend your golden hour well. Every action costs minutes. */
 export function GoldenHourPlayer({ onFinish }: Props) {
+  const t = useT();
   const [clock, setClock] = useState(0);
   const [taken, setTaken] = useState<Taken[]>([]);
   const done = useRef(false);
@@ -116,23 +118,30 @@ export function GoldenHourPlayer({ onFinish }: Props) {
   const finish = useCallback(() => {
     if (done.current) return;
     done.current = true;
-    const score = clampScore(taken.reduce((sum, t) => sum + t.points, 0));
-    const extraLoss = taken.reduce((sum, t) => sum + (t.action.extraLoss ?? 0), 0);
-    const reported = taken.find((t) => t.action.id === '1930');
+    const score = clampScore(taken.reduce((sum, m) => sum + m.points, 0));
+    const extraLoss = taken.reduce((sum, m) => sum + (m.action.extraLoss ?? 0), 0);
+    const reported = taken.find((m) => m.action.id === '1930');
     onFinish({
       score,
       outcome: score >= 80 ? 'safe' : score >= 45 ? 'shaken' : 'lost',
-      title: score >= 80 ? 'Golden-hour hero' : score >= 55 ? 'Good instincts' : score >= 30 ? 'Too slow' : 'The money is gone',
-      text:
-        (reported ? `You reported at minute ${reported.at}. ` : 'You never reported it to 1930. ') +
-        (extraLoss ? `You also lost another ${inr(extraLoss)} along the way. ` : '') +
-        'The ideal order: call 1930 first, then your bank, then save evidence and change passwords.',
+      title: t(score >= 80 ? 'Golden-hour hero' : score >= 55 ? 'Good instincts' : score >= 30 ? 'Too slow' : 'The money is gone'),
+      text: [
+        reported ? t('You reported at minute {m}.', { m: reported.at }) : t('You never reported it to 1930.'),
+        extraLoss ? t('You also lost another {amount} along the way.', { amount: inr(extraLoss) }) : '',
+        t('The ideal order: call 1930 first, then your bank, then save evidence and change passwords.'),
+      ]
+        .filter(Boolean)
+        .join(' '),
       review: {
-        title: 'Your moves, in order',
-        items: [...taken].reverse().map((t) => ({ label: `Minute ${t.at}: ${t.action.label}`, note: t.action.feedback, good: t.action.good })),
+        title: t('Your moves, in order'),
+        items: [...taken].reverse().map((m) => ({
+          label: t('Minute {m}: {label}', { m: m.at, label: t(m.action.label) }),
+          note: t(m.action.feedback),
+          good: m.action.good,
+        })),
       },
     });
-  }, [taken, onFinish]);
+  }, [taken, onFinish, t]);
   // The clock reads the latest finish through a ref, so actions do not restart the tick.
   const finishRef = useRef(finish);
   finishRef.current = finish;
@@ -142,30 +151,31 @@ export function GoldenHourPlayer({ onFinish }: Props) {
       finishRef.current();
       return;
     }
-    const t = setTimeout(() => setClock((c) => c + 1), 1000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setClock((c) => c + 1), 1000);
+    return () => clearTimeout(timer);
   }, [clock]);
 
   const take = (a: Action) => {
-    if (taken.some((t) => t.action.id === a.id)) return;
+    if (taken.some((m) => m.action.id === a.id)) return;
     setTaken((list) => [{ action: a, at: clock, points: a.points(clock) }, ...list]);
     setClock((c) => Math.min(LIMIT, c + a.minutes));
   };
 
-  const score = clampScore(taken.reduce((sum, t) => sum + t.points, 0));
+  const score = clampScore(taken.reduce((sum, m) => sum + m.points, 0));
   const latest = taken[0]?.action;
+  useReadAloud(latest ? t(latest.feedback) : null);
 
   return (
     <div className="golden">
       <p className="golden__sms">
-        <Siren size={15} /> ₹40,000 debited from A/c XX4417 via UPI to <b>unknown beneficiary</b>. Not you?
+        <Siren size={15} /> {t('₹40,000 debited from A/c XX4417 via UPI to')} <b>{t('unknown beneficiary')}</b>. {t('Not you?')}
       </p>
       <div className="golden__clock">
         <span className={`mono ${LIMIT - clock <= 15 ? 'golden__time--low' : ''}`}>
-          <AlarmClock size={16} /> {clock} / {LIMIT} min
+          <AlarmClock size={16} /> {t('{clock} / {limit} min', { clock, limit: LIMIT })}
         </span>
         <span className="golden__odds">
-          Recovery chances <b className="mono">{score}/100</b>
+          {t('Recovery chances')} <b className="mono">{score}/100</b>
         </span>
       </div>
       <div className="golden__track" aria-hidden="true">
@@ -174,25 +184,25 @@ export function GoldenHourPlayer({ onFinish }: Props) {
 
       <div className="golden__log" aria-live="polite">
         {latest ? (
-          <p className={latest.good ? 'golden__fb golden__fb--good' : 'golden__fb golden__fb--bad'}>{latest.feedback}</p>
+          <p className={latest.good ? 'golden__fb golden__fb--good' : 'golden__fb golden__fb--bad'}>{t(latest.feedback)}</p>
         ) : (
-          <p className="golden__fb">Every action takes time. Pick your moves, fast.</p>
+          <p className="golden__fb">{t('Every action takes time. Pick your moves, fast.')}</p>
         )}
       </div>
 
       <div className="golden__actions-grid">
         {ACTIONS.map((a) => {
-          const used = taken.some((t) => t.action.id === a.id);
+          const used = taken.some((m) => m.action.id === a.id);
           return (
             <button key={a.id} className={`golden__action ${used ? 'golden__action--done' : ''}`} onClick={() => take(a)} disabled={used}>
-              <span>{a.label}</span>
-              <em className="mono">{used ? <Check size={14} /> : `${a.minutes} min`}</em>
+              <span>{t(a.label)}</span>
+              <em className="mono">{used ? <Check size={14} /> : t('{n} min', { n: a.minutes })}</em>
             </button>
           );
         })}
       </div>
       <button className="link-button golden__stop" onClick={finish}>
-        I have done everything I can
+        {t('I have done everything I can')}
       </button>
     </div>
   );

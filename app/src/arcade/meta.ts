@@ -25,6 +25,7 @@ export const clampScore = (n: number) => Math.max(0, Math.min(100, Math.round(n)
 interface ArcadeStore {
   best: Record<string, number>;
   record: (gameId: string, score: number) => void;
+  clear: () => void;
 }
 
 /** Best score per game, kept only in this browser (a per-viewer convenience, not a leaderboard). */
@@ -33,6 +34,7 @@ export const useArcadeStore = create<ArcadeStore>()(
     (set) => ({
       best: {},
       record: (gameId, score) => set((s) => ({ best: { ...s.best, [gameId]: Math.max(score, s.best[gameId] ?? 0) } })),
+      clear: () => set({ best: {} }),
     }),
     { name: 'finsim-arcade-v1' },
   ),

@@ -1,5 +1,6 @@
 import { Check, Link2, MessageCircle, Share2 } from 'lucide-react';
 import { useState } from 'react';
+import { useT } from '../i18n/t';
 
 interface Props {
   text: string;
@@ -8,6 +9,7 @@ interface Props {
 
 /** Share a challenge link. The link carries no personal data, only the game to play. */
 export function ShareBar({ text, path }: Props) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
   const url = `${window.location.origin}${path}`;
   const canShare = typeof navigator.share === 'function';
@@ -28,11 +30,11 @@ export function ShareBar({ text, path }: Props) {
 
   return (
     <div className="share-bar">
-      <span className="share-bar__label">Challenge someone</span>
+      <span className="share-bar__label">{t('Challenge someone')}</span>
       <div className="share-bar__buttons">
         {canShare && (
           <button className="btn btn--primary btn--sm" onClick={share}>
-            <Share2 size={16} /> Share
+            <Share2 size={16} /> {t('Share')}
           </button>
         )}
         <a
@@ -44,7 +46,7 @@ export function ShareBar({ text, path }: Props) {
           <MessageCircle size={16} /> WhatsApp
         </a>
         <button className="btn btn--ghost btn--sm" onClick={copy}>
-          {copied ? <Check size={16} /> : <Link2 size={16} />} {copied ? 'Copied' : 'Copy link'}
+          {copied ? <Check size={16} /> : <Link2 size={16} />} {copied ? t('Copied') : t('Copy link')}
         </button>
       </div>
     </div>

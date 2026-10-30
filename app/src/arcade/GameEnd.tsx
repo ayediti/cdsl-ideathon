@@ -1,6 +1,8 @@
-import { ArrowRight, BookOpen, CircleCheck, CircleX, GraduationCap, RotateCcw, Siren } from 'lucide-react';
+import { ArrowRight, BookOpen, CircleCheck, CircleX, Gauge, GraduationCap, RotateCcw, Siren } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useCheckStore } from '../check/store';
 import { ScoreRing } from '../components/ScoreRing';
+import { useReadAloud, useT } from '../i18n/t';
 import { GAMES } from './games';
 import { scoreTier } from './meta';
 import { ShareBar } from './ShareBar';
@@ -12,22 +14,39 @@ interface Props {
   onReplay: () => void;
 }
 
+/** The debrief. The players build `result` already translated; this translates the game's own lists. */
 export function GameEnd({ game, result, onReplay }: Props) {
+  const t = useT();
   const { tier, label } = scoreTier(result.score);
   const next = GAMES[(GAMES.indexOf(game) + 1) % GAMES.length];
+  const awaitingAfterCheck = useCheckStore((s) => !!s.before && !s.after);
+  useReadAloud(`${result.title}. ${result.text}`);
 
   return (
     <div className={`game-end game-end--${result.outcome}`}>
       <div className="game-end__top">
-        <ScoreRing score={result.score} tier={tier} label={label} />
+        <ScoreRing score={result.score} tier={tier} label={t(label)} />
         <div>
-          <span className="eyebrow">{game.title}</span>
+          <span className="eyebrow">{t(game.title)}</span>
           <h1 className="display">{result.title}</h1>
           <p className="lead">{result.text}</p>
         </div>
       </div>
 
-      <ShareBar text={`I scored ${result.score}/100 on “${game.title}”. Could you spot the scam?`} path={`/arcade/${game.id}`} />
+      <ShareBar
+        text={t('I scored {score}/100 on “{title}”. Could you spot the scam?', { score: result.score, title: t(game.title) })}
+        path={`/arcade/${game.id}`}
+      />
+
+      {awaitingAfterCheck && (
+        <Link to="/check" className="check-nudge">
+          <Gauge size={18} />
+          <span>{t('Played a few games? Take the after-check and see how much you have improved.')}</span>
+          <strong>
+            {t('Take the after-check')} <ArrowRight size={15} />
+          </strong>
+        </Link>
+      )}
 
       <section className="game-end__section">
         <h2>{result.review.title}</h2>
@@ -46,7 +65,7 @@ export function GameEnd({ game, result, onReplay }: Props) {
 
       {game.redFlags.length > 0 && (
         <section className="game-end__section">
-          <h2>Red flags to remember</h2>
+          <h2>{t('Red flags to remember')}</h2>
           <ul className="flag-cards">
             {game.redFlags.map((f) => (
               <li key={f.title} className="flag-card">
@@ -54,8 +73,8 @@ export function GameEnd({ game, result, onReplay }: Props) {
                   <Siren size={18} />
                 </span>
                 <div>
-                  <strong>{f.title}</strong>
-                  <p>{f.why}</p>
+                  <strong>{t(f.title)}</strong>
+                  <p>{t(f.why)}</p>
                 </div>
               </li>
             ))}
@@ -64,12 +83,12 @@ export function GameEnd({ game, result, onReplay }: Props) {
       )}
 
       <section className="game-end__section">
-        <h2>If this happens for real</h2>
+        <h2>{t('If this happens for real')}</h2>
         <ol className="steps">
           {game.respond.map((step, i) => (
             <li key={i}>
               <span className="steps__num">{i + 1}</span>
-              <span>{step}</span>
+              <span>{t(step)}</span>
             </li>
           ))}
         </ol>
@@ -77,16 +96,16 @@ export function GameEnd({ game, result, onReplay }: Props) {
 
       <div className="game-end__actions">
         <button className="btn btn--ghost" onClick={onReplay}>
-          <RotateCcw size={16} /> Play again
+          <RotateCcw size={16} /> {t('Play again')}
         </button>
         <Link className="btn btn--ghost" to={`/library/${game.learnMore.slug}`}>
-          <BookOpen size={16} /> Read: {game.learnMore.label}
+          <BookOpen size={16} /> {t('Read: {label}', { label: t(game.learnMore.label) })}
         </Link>
         <Link className="btn btn--ghost" to="/learn">
-          <GraduationCap size={16} /> Go deeper in the course
+          <GraduationCap size={16} /> {t('Go deeper in the course')}
         </Link>
         <Link className="btn btn--primary" to={`/arcade/${next.id}`}>
-          Next: {next.title} <ArrowRight size={16} />
+          {t('Next: {title}', { title: t(next.title) })} <ArrowRight size={16} />
         </Link>
       </div>
     </div>

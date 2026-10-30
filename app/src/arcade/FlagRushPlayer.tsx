@@ -1,5 +1,6 @@
 import { ArrowRight, Mail, MessageCircle, MessageSquare, Timer } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from 'react';
+import { useT } from '../i18n/t';
 import { segment } from '../screens/segment';
 import { clampScore } from './meta';
 import type { FlagRushGame, GameResult } from './types';
@@ -14,6 +15,7 @@ interface Props {
 
 /** Timed hunt: flags look like plain text; tapping anything else costs points. */
 export function FlagRushPlayer({ game, onFinish }: Props) {
+  const t = useT();
   const [round, setRound] = useState(0);
   const [found, setFound] = useState<string[]>([]);
   const [misses, setMisses] = useState(0);
@@ -23,6 +25,8 @@ export function FlagRushPlayer({ game, onFinish }: Props) {
 
   const total = game.rounds.reduce((n, r) => n + r.flags.length, 0);
   const current = game.rounds[round];
+  // Translated snippets appear verbatim in the translated message (checked when the dictionary changes).
+  const flags = current.flags.map((f) => ({ id: f.id, snippet: t(f.snippet) }));
   const key = (r: number, id: string) => `${r}:${id}`;
   const roundComplete = current.flags.every((f) => found.includes(key(round, f.id)));
 
@@ -33,18 +37,18 @@ export function FlagRushPlayer({ game, onFinish }: Props) {
     onFinish({
       score,
       outcome: score >= 80 ? 'safe' : score >= 50 ? 'shaken' : 'lost',
-      title: `${found.length} of ${total} red flags found`,
+      title: t('{found} of {total} red flags found', { found: found.length, total }),
       text:
-        (misses ? `${misses} wrong ${misses === 1 ? 'tap' : 'taps'} (−${misses * MISS_PENALTY}). ` : '') +
-        'Scammers count on you reading fast. Every flag you missed is one they hope you will miss for real.',
+        (misses ? `${t('{n} wrong taps (−{p}).', { n: misses, p: misses * MISS_PENALTY })} ` : '') +
+        t('Scammers count on you reading fast. Every flag you missed is one they hope you will miss for real.'),
       review: {
-        title: 'Every red flag',
+        title: t('Every red flag'),
         items: game.rounds.flatMap((r, ri) =>
-          r.flags.map((f) => ({ label: `“${f.snippet}”`, note: f.why, good: found.includes(key(ri, f.id)) })),
+          r.flags.map((f) => ({ label: `“${t(f.snippet)}”`, note: t(f.why), good: found.includes(key(ri, f.id)) })),
         ),
       },
     });
-  }, [found, misses, total, game, onFinish]);
+  }, [found, misses, total, game, onFinish, t]);
   // The timer reads the latest finish through a ref, so taps do not restart the countdown.
   const finishRef = useRef(finish);
   finishRef.current = finish;
@@ -54,8 +58,8 @@ export function FlagRushPlayer({ game, onFinish }: Props) {
       finishRef.current();
       return;
     }
-    const t = setTimeout(() => setLeft((s) => s - 1), 1000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setLeft((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
   }, [left]);
 
   const advance = useCallback(() => {
@@ -65,8 +69,8 @@ export function FlagRushPlayer({ game, onFinish }: Props) {
 
   useEffect(() => {
     if (!roundComplete) return;
-    const t = setTimeout(advance, 700);
-    return () => clearTimeout(t);
+    const timer = setTimeout(advance, 700);
+    return () => clearTimeout(timer);
   }, [roundComplete, advance]);
 
   const hit = (e: MouseEvent, id: string) => {
@@ -79,6 +83,22 @@ export function FlagRushPlayer({ game, onFinish }: Props) {
     setShake((s) => s + 1);
   };
 
+  // The sender line can hold a flag too (a lookalike email domain), so both lines are tappable.
+  const renderFlags = (text: string) =>
+    segment(text, flags).map((seg, i) =>
+      seg.flagId ? (
+        <button
+          key={i}
+          className={`rush-flag ${found.includes(key(round, seg.flagId)) ? 'rush-flag--found' : ''}`}
+          onClick={(e) => hit(e, seg.flagId!)}
+        >
+          {seg.text}
+        </button>
+      ) : (
+        <span key={i}>{seg.text}</span>
+      ),
+    );
+
   const Icon = CHANNEL_ICON[current.channel];
   const roundFound = current.flags.filter((f) => found.includes(key(round, f.id))).length;
 
@@ -89,9 +109,12 @@ export function FlagRushPlayer({ game, onFinish }: Props) {
           <Timer size={16} /> <span className="mono">{left}s</span>
         </span>
         <span className="rush__count">
-          Message {round + 1}/{game.rounds.length} · <strong>{roundFound}</strong>/{current.flags.length} flags
+          {t('Message {r}/{n}', { r: round + 1, n: game.rounds.length })} · <strong>{roundFound}</strong>/{current.flags.length}{' '}
+          {t('flags')}
         </span>
-        <span className="rush__score mono">{found.length * 10 - misses * MISS_PENALTY} pts</span>
+        <span className="rush__score mono">
+          {found.length * 10 - misses * MISS_PENALTY} {t('pts')}
+        </span>
       </div>
       <div className="rush__track" aria-hidden="true">
         <span style={{ width: `${(left / game.seconds) * 100}%` }} />
@@ -102,30 +125,16 @@ export function FlagRushPlayer({ game, onFinish }: Props) {
           <span className="artifact__app">
             <Icon size={16} />
           </span>
-          <span className="artifact__from">{current.from}</span>
+          <span className="artifact__from">{renderFlags(current.from)}</span>
           <span className="artifact__time">{current.channel}</span>
         </div>
-        <div className="artifact__text">
-          {segment(current.text, current.flags).map((seg, i) =>
-            seg.flagId ? (
-              <button
-                key={i}
-                className={`rush-flag ${found.includes(key(round, seg.flagId)) ? 'rush-flag--found' : ''}`}
-                onClick={(e) => hit(e, seg.flagId!)}
-              >
-                {seg.text}
-              </button>
-            ) : (
-              <span key={i}>{seg.text}</span>
-            ),
-          )}
-        </div>
+        <div className="artifact__text">{renderFlags(t(current.text))}</div>
       </div>
 
-      <p className="hint center">Tap the suspicious words. Wrong taps cost {MISS_PENALTY} points.</p>
+      <p className="hint center">{t('Tap the suspicious words. Wrong taps cost {n} points.', { n: MISS_PENALTY })}</p>
       <div className="rof__next">
         <button className="btn btn--ghost" onClick={advance}>
-          {round < game.rounds.length - 1 ? 'Skip to next message' : 'Finish'} <ArrowRight size={16} />
+          {round < game.rounds.length - 1 ? t('Skip to next message') : t('Finish')} <ArrowRight size={16} />
         </button>
       </div>
     </div>

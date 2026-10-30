@@ -1,0 +1,374 @@
+% FinSim -- CDSL Reimagine Ideathon, Screening Round entry
+% Compile with pdfLaTeX on Overleaf. Upload all .png files from this folder next to this file.
+% A missing image is replaced by a labelled placeholder box, so the document compiles either way.
+% Target: exactly 3 full pages. Tune with \figh below: lower it (e.g. 3.4cm) if it spills onto page 4,
+% raise it (e.g. 4.3cm) if page 3 has empty space. Every image is a real screenshot of the FinSim prototype.
+
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[a4paper,margin=0.5in,columnsep=0.25in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext,newtxmath}
+\usepackage{microtype}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[font=footnotesize,labelfont=bf,skip=2pt]{caption}
+\usepackage[hidelinks]{hyperref}
+
+% ---- Colours taken from the prototype ------------------------------------------
+\definecolor{brand}{HTML}{0E6B57}
+\definecolor{coral}{HTML}{D9472F}
+\definecolor{soft}{HTML}{F5F0E6}
+\definecolor{mint}{HTML}{DCEFE7}
+
+% ---- Compact, paper-like layout ---------------------------------------------------
+\titleformat{\section}{\normalfont\large\bfseries\color{brand}}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{6pt}{2pt}
+\titlespacing*{\subsection}{0pt}{4pt}{1pt}
+\setlist{nosep,leftmargin=1.1em,itemsep=1pt}
+\setlength{\parskip}{2pt}
+\setlength{\parindent}{0pt}
+\setlength{\textfloatsep}{6pt}
+\setlength{\floatsep}{5pt}
+\setlength{\intextsep}{5pt}
+\renewcommand{\arraystretch}{1.12}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+% Tables and figures are NOT floats: each is an unbreakable block that stays exactly where it is written.
+\newenvironment{inlinetable}{\par\smallskip\noindent\begin{minipage}{\columnwidth}\centering\footnotesize}{\end{minipage}\par\smallskip}
+\newenvironment{inlinefig}{\par\smallskip\noindent\begin{minipage}{\columnwidth}\centering}{\end{minipage}\par\smallskip}
+\raggedbottom % never stretch a column to fill the page
+
+% Height of the small in-column screenshot pairs. Lower it to save space.
+\newcommand{\figh}{3.8cm}
+
+% \shot{file}{width}{height}: image scaled to fit the box, or a placeholder if missing.
+\newcommand{\shot}[3]{%
+  \IfFileExists{#1}{\includegraphics[width=#2,height=#3,keepaspectratio]{#1}}{%
+    \fbox{\parbox[c][#3][c]{\dimexpr#2-2\fboxsep-2\fboxrule\relax}{\centering\scriptsize\color{gray}\texttt{#1}}}}}
+
+% \pair{file1}{caption1}{file2}{caption2}{figure caption}{label}: two small shots side by side in one column.
+\newcommand{\pair}[6]{%
+  \begin{inlinefig}
+  \begin{minipage}[b]{0.49\columnwidth}\centering\shot{#1}{\linewidth}{\figh}\\[-1pt]{\scriptsize\itshape #2}\end{minipage}\hfill
+  \begin{minipage}[b]{0.49\columnwidth}\centering\shot{#3}{\linewidth}{\figh}\\[-1pt]{\scriptsize\itshape #4}\end{minipage}
+  \captionof{figure}{#5}\label{#6}
+  \end{inlinefig}}
+
+% Shaded pitch box.
+\newcommand{\pitch}[1]{\par\noindent\colorbox{mint}{\parbox{\dimexpr\columnwidth-2\fboxsep}{\small #1}}\par\vspace{2pt}}
+
+\begin{document}
+
+% ================================================================================
+\twocolumn[{%
+\begin{center}
+  {\LARGE\bfseries FinSim: Learn the Market, and the People Trying to Trick You}\\[3pt]
+  {\normalsize Flintech \;$\cdot$\; Prof. Debashish Chakravarty, Aditi Choudhary, Harshil Agarwal \;$\cdot$\; IIT Kharagpur}\\[1pt]
+  {\small CDSL Reimagine Ideathon 2027 \;$\cdot$\; Screening Round Submission}
+\end{center}
+\vspace{-3pt}
+\colorbox{soft}{\parbox{\dimexpr\textwidth-2\fboxsep}{\small
+\textbf{Abstract.} India is adding investors faster than it is adding \emph{informed} investors. Only $\sim$9.5\% of households
+invest in securities, fewer than 1\% of people ever attend SEBI's investor education programmes, and 51\% of non-investors say
+they do not trust the market, while fraudsters now reach people directly through WhatsApp, video calls and deepfakes.
+\textbf{FinSim} answers with \emph{practice, not lectures}: a free, browser-based platform where people get scammed safely and
+learn the market by living it. Six two-minute, shareable \textbf{scam games} (digital arrest, pension/KYC calls, deepfakes,
+pump-and-dump groups, fake IPO allotments, and the ``golden hour'' after fraud) pull people in; an eight-chapter
+\textbf{investor course} with virtual money and a virtual phone takes them from ``what is a share'' to reading their own CAS. The
+games attract; the course educates. \textbf{The prototype already works, in English and Hindi, with read-aloud, large text
+and a built-in before/after self-check.}\\[1pt]
+\textbf{Keywords:} investor education, cyber fraud, gamified learning, inoculation, securities literacy, inclusion.}}
+\vspace{6pt}
+}]
+
+% ================================================================================
+\section{About the Idea}
+
+\subsection{Idea title}
+\textbf{FinSim: Learn the Market, and the People Trying to Trick You.}
+
+\subsection{The problem: reach, not value}
+\begin{itemize}
+  \item \textbf{Low participation:} only 3.21\,cr of 33.72\,cr households ($\sim$9.5\%) invest in securities, though 63\% know at
+        least one product \cite{ps}.
+  \item \textbf{Education does not reach people:} under 1\% join SEBI's investor education programmes, yet 91\% of those who do
+        rate them highly useful \cite{ps}.
+  \item \textbf{Trust is the barrier:} 51\% of non-investors cite trust; $\sim$80\% of households are risk-averse \cite{ps}.
+  \item \textbf{The most exposed are the least prepared:} 18--29 year-olds score lowest on financial literacy (NCFE) \cite{ps},
+        seniors are prime targets of impersonation scams, and 80\% of demat accounts come from Tier II+ cities.
+\end{itemize}
+\pitch{\textbf{Our insight.} People do not lack information; they lack \emph{rehearsal}. Nobody reads a circular in the middle
+of a ``police'' video call. FinSim lets people rehearse that moment, and dozens like it, before it happens for real.}
+
+\subsection{Summary of the idea}
+FinSim has two doors into the same goal. Everything inside is simulated: fictional companies, virtual money, no real accounts.
+
+\textbf{(A) Scam games: the hook.} Six standalone, two-minute games (Table~\ref{tab:games}), each a link you can send on
+WhatsApp. Players make choices in a realistic chat, call or feed, and every game ends with a debrief: a score, a review of each
+choice, the red flags, and the real-world response (1930, cybercrime.gov.in, freezing accounts, SEBI SCORES).
+
+\pair{chat.png}{A fake ``inspector'' on a video call}{deepfake.png}{Real or deepfake? Judge, then learn why}
+     {Scam games put the player inside the scam, with consequences.}{fig:games}
+
+\begin{inlinetable}
+\captionof{table}{The six scam games.}
+\label{tab:games}
+\begin{tabularx}{\columnwidth}{@{}p{1.95cm}Lp{1.5cm}@{}}
+\toprule
+\textbf{Game} & \textbf{What the player practises} & \textbf{Audience} \\
+\midrule
+The Golden Hour   & Acting fast in the first 60 min after fraud & All \\
+Digital Arrest    & Leaving a fake ``police'' video call & Seniors, all \\
+Real or Deepfake? & Judging cloned voices, fake ads, notices & All \\
+The Pension Call  & Refusing OTP-based ``life certificate'' calls & Seniors \\
+The Tip Group     & Resisting a pump-and-dump group & Students, investors \\
+Red Flag Rush     & Spotting flags in IPO, app, KYC scams & Students, investors \\
+\bottomrule
+\end{tabularx}
+\end{inlinetable}
+
+\pair{pension.png}{Pension Call: the OTP really says ``add beneficiary''}{rush.png}{Red Flag Rush: tap the tricks against the clock}
+     {Each game drills one habit: read the OTP, spot the bait.}{fig:games2}
+
+\textbf{(B) Investor course: the depth.} Eight chapters in three modules (Table~\ref{tab:course}). Every chapter
+\emph{teaches through interaction first}, with explore cards, sorting, sequencing and hands-on labs (Fig.~\ref{fig:labs}), and
+only then quizzes. Learners can start at any chapter.
+
+\pair{pricelab.png}{Price lab: news moves buyers and sellers}{compound.png}{Compounding lab: time beats amount}
+     {Concepts are learned by playing with them, not reading about them.}{fig:labs}
+
+\begin{inlinetable}
+\captionof{table}{Course structure: concept $\rightarrow$ interaction.}
+\label{tab:course}
+\begin{tabularx}{\columnwidth}{@{}p{2.45cm}L@{}}
+\toprule
+\textbf{Chapter} & \textbf{Concept $\rightarrow$ interaction} \\
+\midrule
+Money DNA              & Money personality $\rightarrow$ scenario quiz \\
+What Is a Share?       & Owning vs lending $\rightarrow$ sort, price lab \\
+Where Your Shares Live & Bank/trading/demat, CDSL/NSDL, DPs $\rightarrow$ sequence a trade \\
+The Quiet Multiplier   & Compounding $\rightarrow$ slider lab, recurring deposit \\
+Opening a Demat A/c    & SEBI registration, KYC, nominee, DDPI/TPIN $\rightarrow$ phone task \\
+Reading Your CAS       & CAS anatomy $\rightarrow$ catch an unauthorised transfer \\
+IPO, the Safe Way      & ASBA, UPI mandate, lottery $\rightarrow$ legit-or-scam sort \\
+Investor Scam Radar    & Fake apps, tip groups, fake regulators $\rightarrow$ scam autopsy \\
+\bottomrule
+\end{tabularx}
+\end{inlinetable}
+
+\pair{anatomy.png}{Explore: tap each part of a CAS}{sort.png}{Sort: legit or scam, with instant feedback}
+     {Teaching screens come before every quiz.}{fig:teach}
+
+A \textbf{virtual phone} makes it real: users verify a broker in a simulated SEBI registration lookup, and later spot an
+off-market transfer they never made in their own CAS (Fig.~\ref{fig:phone}).
+
+\pair{verify.png}{Verify: ``StockGuru Pro'' is not registered}{cas.png}{CAS: an unauthorised transfer, flagged}
+     {The virtual phone turns verification into a habit.}{fig:phone}
+
+\subsection{How it empowers, includes and builds trust}
+FinSim is built around the four values the problem statement asks for, and every feature maps to at least one of them
+(Table~\ref{tab:values}).
+
+\begin{inlinetable}
+\captionof{table}{Alignment with the problem statement's four values.}
+\label{tab:values}
+\begin{tabularx}{\columnwidth}{@{}p{1.5cm}L@{}}
+\toprule
+\textbf{Value} & \textbf{How FinSim delivers it} \\
+\midrule
+Empowerment & Decide, see consequences on simulated money, learn why; independent decisions, never advice. \\
+Trust       & Teaches \emph{verification}: SEBI registration, CAS as the source of truth, official channels only. \\
+Safety      & Learn $\rightarrow$ recognise $\rightarrow$ avoid $\rightarrow$ respond, end to end. \\
+Inclusion   & Scenarios per audience; English + Hindi, read-aloud, large text; browser-only, no sign-up. \\
+\bottomrule
+\end{tabularx}
+\end{inlinetable}
+
+\subsection{Has this been done before?}
+Only in parts. \textbf{FiAlly} (India) is a financial life simulator for young people, focused on banking and life skills.
+\textbf{SEBI's} programmes and Saarthi app and \textbf{RBI's} campaigns are largely informational. \textbf{Bad News} and
+\textbf{Go Viral!} (University of Cambridge and partners, UK) proved that playing through a manipulation builds resistance to it
+\cite{roozenbeek,basol}, but not for finance. \textbf{FinSim is, to our knowledge, the first to combine securities-market
+literacy, investor-specific fraud practice and a response playbook for students, first-time investors and seniors together.}
+
+\subsection{Unique aspects}
+\begin{itemize}
+  \item \textbf{Securities-native:} demat, depositories, DPs, CAS, DDPI/TPIN, ASBA and SEBI checks, not generic bank tips.
+  \item \textbf{Safe failure:} fall for a scam, lose virtual savings, then see exactly how it was done.
+  \item \textbf{Two doors:} two-minute games for reach, a deep course for literacy.
+  \item \textbf{Viral by design:} every game is a challenge link (``I scored 80, can you?'') carrying no personal data.
+  \item \textbf{Teach, then test;} start anywhere.
+\end{itemize}
+
+\begin{inlinefig}
+\shot{home.png}{\columnwidth}{4.4cm}
+\captionof{figure}{Working prototype: the course and all six games on one screen.}
+\label{fig:home}
+\end{inlinefig}
+
+\subsection{Implementation}
+\textbf{Technology.} A lightweight React/TypeScript web app; content is stored as data, so new scams and new languages need no
+new code. Static hosting keeps running costs close to zero.
+
+\textbf{Data protection and privacy by design.}
+\begin{itemize}
+  \item \textbf{Nothing to steal:} no login, no names, no phone numbers; it never asks for PAN, Aadhaar, OTPs or account details.
+  \item \textbf{Stays on the device:} progress and scores live only in the user's browser, and one button wipes them.
+  \item \textbf{Clean sharing:} share links carry only the game's name, never a score history or identity.
+  \item \textbf{Measurement without tracking:} the pilot uses anonymous, aggregate counts and opt-in surveys, consistent with
+        data minimisation under the DPDP Act, 2023 \cite{dpdp}.
+\end{itemize}
+
+\textbf{Accessibility and inclusion, already built.}
+\begin{itemize}
+  \item \textbf{English and Hindi} with one tap: the home page, all six games and the self-check (Fig.~\ref{fig:inclusion}).
+  \item \textbf{Read-aloud} for low-literacy users and seniors: every chat line, card and result is spoken in Hindi or English.
+  \item \textbf{Large-text mode} that scales the whole site, and it works on any phone browser with no install.
+  \item \textbf{Built-in before/after self-check}: two equivalent six-message tests measure learning on the device itself.
+\end{itemize}
+Next: Hindi for the course chapters, more regional languages (content is data, so no code changes), an untimed mode for
+seniors and a lite version for low bandwidth.
+
+\pair{hindi.png}{The Pension Call, fully in Hindi}{selfcheck.png}{Before/after self-check (example result)}
+     {Inclusion and measurement are built into the prototype today.}{fig:inclusion}
+
+\begin{inlinetable}
+\captionof{table}{Roll-out plan.}
+\label{tab:plan}
+\begin{tabularx}{\columnwidth}{@{}p{1.45cm}L@{}}
+\toprule
+\textbf{Phase} & \textbf{Deliverables} \\
+\midrule
+1. Done          & Working prototype: 6 games, 8 chapters, 10 articles; English + Hindi, read-aloud, large text, before/after self-check. \\
+2. Validate (3 mo) & Real users at 2--3 colleges and a senior citizens' association; impact measured by the built-in self-check; Hindi course. \\
+3. Scale         & Links in DP onboarding and CAS emails, SEBI programmes, colleges, WhatsApp; more regional languages. \\
+\bottomrule
+\end{tabularx}
+\end{inlinetable}
+
+\pitch{\textbf{Why CDSL is the perfect channel.} Every investor already receives a CAS. One line in that email (``Can you spot
+the scam? Play in 2 minutes'') could put FinSim in front of millions of demat holders at almost no cost.}
+
+% ================================================================================
+\section{Challenges, Risks \& Assumptions}
+
+\subsection{Potential roadblocks}
+\begin{inlinetable}
+\captionof{table}{Risks and mitigations.}
+\label{tab:risks}
+\begin{tabularx}{\columnwidth}{@{}p{2.1cm}L@{}}
+\toprule
+\textbf{Risk} & \textbf{Mitigation} \\
+\midrule
+Low digital literacy & Short games, large text, voice, play with family \\
+New scams appear     & Monthly content updates from official advisories \\
+Accuracy, compliance & Expert review; fictional entities; no advice or trading \\
+Drop-off             & Two-minute games, no sign-up, shareable scores \\
+Proving impact       & Built-in before/after self-check; anonymous aggregate metrics \\
+\bottomrule
+\end{tabularx}
+\end{inlinetable}
+
+\textbf{Assumptions:} users have basic smartphone and internet access; partners (colleges, DPs, associations) will share links;
+domain experts can review content before scale-up.
+
+\pair{tipgroup.png}{The Tip Group: the rocket before the dump}{golden.png}{Golden Hour: every move costs minutes}
+     {Games cover the whole arc, from temptation to response.}{fig:more}
+
+\subsection{Why will this idea work?}
+\begin{itemize}
+  \item \textbf{It is evidence-based:} inoculation games measurably improve people's ability to recognise manipulation
+        \cite{roozenbeek,basol}.
+  \item \textbf{It fixes the real bottleneck:} the gap is reach, not value. A two-minute link removes the seminar barrier.
+  \item \textbf{It spreads itself:} a score you can challenge your family with is a reason to share; every share is a new learner.
+  \item \textbf{It already works:} the prototype is built and tested, in two languages, with measurement included.
+\end{itemize}
+
+\begin{inlinetable}
+\captionof{table}{FinSim against the evaluation criteria.}
+\label{tab:criteria}
+\begin{tabularx}{\columnwidth}{@{}p{1.75cm}L@{}}
+\toprule
+\textbf{Criterion} & \textbf{Evidence in FinSim} \\
+\midrule
+Innovation       & Scam inoculation games + securities simulation in one platform \\
+UX / UI          & One-screen home; two-minute games; teach-then-test chapters \\
+Behavioural impact & Rehearses real decisions; measured by the before/after self-check \\
+Feasibility      & Working prototype today; static hosting; data-driven content \\
+Scalability      & Shareable links; CAS-email and DP distribution; near-zero cost \\
+Accessibility    & English + Hindi, read-aloud, large text; browser-only, no sign-up \\
+Data protection  & No personal data collected; all progress stays on device \\
+Presentation     & Working demo of every feature shown in this paper \\
+\bottomrule
+\end{tabularx}
+\end{inlinetable}
+
+% ================================================================================
+\section{Impact}
+
+\subsection{Who will benefit the most}
+\begin{itemize}
+  \item \textbf{Senior citizens:} recognise digital-arrest, pension and impersonation scams; know whom to call.
+  \item \textbf{First-time investors}, especially in Tier II+ cities: practical command of demat, CAS, IPOs and investor fraud.
+  \item \textbf{Students (18--29):} resistance to finfluencer tips, fake trading apps and pump-and-dump groups.
+\end{itemize}
+
+\pitch{\textbf{Three learners, three journeys} (illustrative).\\[1pt]
+\textbf{Kamala, 68, retired teacher:} her grandson forwards \emph{The Pension Call}. She learns to read what an OTP is for. When a
+real ``treasury officer'' calls, she hangs up and phones her branch.\\[1pt]
+\textbf{Rohan, 20, student:} added to a stock-tip group, he plays \emph{The Tip Group} first, checks the ``SEBI-registered expert''
+and exits. Then he challenges his friends.\\[1pt]
+\textbf{Priya, 29, first-time investor in Indore:} takes the course before opening her demat account, adds a nominee, never
+shares her TPIN, and now reads every CAS.}
+
+\begin{inlinefig}
+\shot{debrief.png}{\columnwidth}{2.6cm}
+\captionof{figure}{Every game ends with a score and a challenge to share.}
+\label{fig:debrief}
+\end{inlinefig}
+
+\subsection{Expected outcomes and benefits}
+\begin{inlinetable}
+\captionof{table}{Outcomes and how they will be measured.}
+\label{tab:kpi}
+\begin{tabularx}{\columnwidth}{@{}LL@{}}
+\toprule
+\textbf{Outcome} & \textbf{Measure} \\
+\midrule
+Better scam detection    & Built-in before/after self-check score \\
+Knows the response steps & \% who can name 1930 and account-freeze steps \\
+Verification habits      & \% who check SEBI registration / read CAS \\
+Reach                    & Plays, completions, shares (anonymous) \\
+Confidence in markets    & Self-reported confidence, before/after \\
+\bottomrule
+\end{tabularx}
+\end{inlinetable}
+
+The result is the investor the problem statement calls for: informed, responsible, confident, and \emph{Atmanirbhar}.
+
+\pitch{\textbf{Our goal:} help people make safer financial decisions \emph{before} a scammer gets the chance to make them for
+real. \textbf{Our ask:} a pilot with CDSL's investor-awareness network to prove it at scale.}
+
+% ================================================================================
+\begingroup
+\footnotesize
+\begin{thebibliography}{9}\setlength{\itemsep}{0pt}
+\bibitem{ps} CDSL, \emph{Reimagine Ideathon: Problem Statement}, 2026. \url{https://ideathon.cdslindia.com}
+\bibitem{roozenbeek} J.~Roozenbeek and S.~van der Linden, ``Fake news game confers psychological resistance against online
+  misinformation,'' \emph{Palgrave Communications}, 5, 65, 2019.
+\bibitem{basol} M.~Basol, J.~Roozenbeek and S.~van der Linden, ``Good news about Bad News: Gamified inoculation boosts confidence
+  and cognitive immunity against fake news,'' \emph{Journal of Cognition}, 3(1), 2, 2020.
+\bibitem{dpdp} Government of India, \emph{Digital Personal Data Protection Act}, 2023.
+\bibitem{sebi} SEBI, \url{https://www.sebi.gov.in}; SCORES, \url{https://scores.sebi.gov.in}; National Cyber Crime Reporting
+  Portal, \url{https://cybercrime.gov.in} (helpline 1930).
+\end{thebibliography}
+\endgroup
+
+\end{document}

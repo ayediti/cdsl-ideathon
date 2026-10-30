@@ -11,6 +11,8 @@ interface GameBase {
   id: string;
   title: string;
   tagline: string;
+  /** One quiet line for the home page list. */
+  short: string;
   audiences: Audience[];
   minutes: number;
   tone: 'coral' | 'violet' | 'sky' | 'sun' | 'brand';
