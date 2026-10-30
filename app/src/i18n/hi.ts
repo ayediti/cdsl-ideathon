@@ -40,6 +40,7 @@ export const HI: Record<string, string> = {
     'यहाँ सब कुछ सिम्युलेटेड है: कोई असली पैसा नहीं, कोई साइन-अप नहीं, कोई निवेश सलाह नहीं।',
   'In a real emergency, call': 'असली आपात स्थिति में कॉल करें',
   'Restart simulation': 'सिमुलेशन फिर से शुरू करें',
+  'Click again: delete all progress and scores': 'दोबारा क्लिक करें: सारी प्रगति और स्कोर मिट जाएँगे',
   'Restart everything? Your simulated money, phone, course progress, game scores and self-check results will be deleted from this browser.':
     'सब कुछ फिर से शुरू करें? आपका सिम्युलेटेड पैसा, फ़ोन, कोर्स की प्रगति, गेम स्कोर और सेल्फ़-चेक के नतीजे इस ब्राउज़र से मिट जाएँगे।',
   'How scam-proof are you?': 'आप कितने स्कैम-प्रूफ़ हैं?',

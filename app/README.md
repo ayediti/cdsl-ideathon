@@ -77,6 +77,10 @@ Phone apps: Messages, Bank, Calculator, **Demat** (holdings + CAS statement) and
 
 Every chapter is open, so learners can jump straight to the one they need. If a chapter depends on earlier ones (savings, shares in the demat account), give it an `entry` list of `ensure*` effects: they run once when the chapter is opened and do nothing if the player already has what is needed. In dev mode, a missing screen id or autopsy snippet logs an error in the console.
 
+## Hosted version
+
+`npm run build:artifact` builds the copy hosted at https://claude.ai/artifact/96CXv6Fk6jAazB1iaCkL91 into `dist-artifact/`. It differs from the normal build only in [`.env.artifact`](.env.artifact): hash-based routes (the page runs inside a frame) and share links that point to the public page. Confirmations are two-click buttons in the page, because browser `confirm()` dialogs are blocked there.
+
 ## Language, read-aloud, large text, self-check
 
 - **Hindi:** `src/i18n/hi.ts` maps each English string to Hindi; `useT()` translates at render and falls back to English. The home page, all games and the self-check are covered. In Red Flag Rush, each translated snippet must appear verbatim in its translated message.

@@ -2806,6 +2806,7 @@ button {
   transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
 
+.home__restart.is-armed,
 .home__restart:hover {
   border-color: var(--bad);
   background: var(--bad-soft);

@@ -2,6 +2,7 @@ import { ArrowRight, BookMarked, Check, Gamepad2, Layers, PartyPopper, Play, Rot
 import { Link, useLocation } from 'react-router-dom';
 import { DnaCard } from '../components/DnaCard';
 import { AccessControls } from '../components/AccessControls';
+import { ConfirmButton } from '../components/ConfirmButton';
 import { Hud } from '../components/Hud';
 import { Logo } from '../components/Logo';
 import { ALL_CHAPTERS, chapterKey, MODULES, screenPath } from '../engine/curriculum';
@@ -20,10 +21,6 @@ export function Home() {
       ? `/play/${progress.moduleId}/${progress.chapterId}/${progress.screenId}`
       : null;
   const ctaPath = inProgress ?? (nextUp ? screenPath(nextUp) : null);
-
-  const onReset = () => {
-    if (window.confirm('Reset all progress and start the simulation again?')) reset();
-  };
 
   return (
     <div className="app-shell">
@@ -148,9 +145,17 @@ export function Home() {
             </section>
           ))}
 
-          <button className="link-button link-button--danger" onClick={onReset}>
+          <ConfirmButton
+            className="link-button link-button--danger"
+            onConfirm={reset}
+            confirmLabel={
+              <>
+                <RotateCcw size={15} /> Click again to reset all course progress
+              </>
+            }
+          >
             <RotateCcw size={15} /> Reset simulation
-          </button>
+          </ConfirmButton>
         </main>
         <aside className="hud" aria-label="Your simulation">
           <Hud />

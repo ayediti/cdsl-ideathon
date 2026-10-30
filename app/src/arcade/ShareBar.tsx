@@ -11,7 +11,8 @@ interface Props {
 export function ShareBar({ text, path }: Props) {
   const t = useT();
   const [copied, setCopied] = useState(false);
-  const url = `${window.location.origin}${path}`;
+  // The hosted build cannot deep-link into the frame, so it shares the public page link instead.
+  const url = import.meta.env.VITE_PUBLIC_URL || `${window.location.origin}${path}`;
   const canShare = typeof navigator.share === 'function';
 
   const copy = async () => {

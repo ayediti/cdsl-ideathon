@@ -29,6 +29,7 @@ import { GAME_ICON, useArcadeStore } from '../arcade/meta';
 import { BRAND } from '../brand';
 import { useCheckStore } from '../check/store';
 import { AccessControls } from '../components/AccessControls';
+import { ConfirmButton } from '../components/ConfirmButton';
 import { ALL_CHAPTERS, chapterKey, MODULES, screenPath } from '../engine/curriculum';
 import { useSimStore } from '../engine/simStore';
 import type { Module } from '../engine/types';
@@ -72,17 +73,9 @@ export function Landing() {
   const resume = progress ? `/play/${progress.moduleId}/${progress.chapterId}/${progress.screenId}` : null;
 
   const restart = () => {
-    if (
-      window.confirm(
-        t(
-          'Restart everything? Your simulated money, phone, course progress, game scores and self-check results will be deleted from this browser.',
-        ),
-      )
-    ) {
-      reset();
-      clear();
-      clearChecks();
-    }
+    reset();
+    clear();
+    clearChecks();
   };
 
   return (
@@ -219,9 +212,17 @@ export function Landing() {
         </p>
       </footer>
 
-      <button className="home__restart" onClick={restart}>
+      <ConfirmButton
+        className="home__restart"
+        onConfirm={restart}
+        confirmLabel={
+          <>
+            <RotateCcw size={15} /> {t('Click again: delete all progress and scores')}
+          </>
+        }
+      >
         <RotateCcw size={15} /> {t('Restart simulation')}
-      </button>
+      </ConfirmButton>
     </div>
   );
 }
