@@ -4,7 +4,7 @@ import { BrowserRouter, HashRouter } from 'react-router-dom';
 import App from './App';
 import './styles.css';
 
-// The hosted claude.ai build runs inside a frame where only the hash is ours to use for routes.
+// The GitHub Pages build routes after the # (Pages serves only real files, so /arcade/x would 404).
 const Router = import.meta.env.VITE_ROUTER === 'hash' ? HashRouter : BrowserRouter;
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

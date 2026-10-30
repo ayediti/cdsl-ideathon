@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "build:artifact": "tsc --noEmit && vite build --mode artifact --base ./ --outDir dist-artifact",
+    "build:pages": "tsc --noEmit && vite build --mode pages --base ./ --outDir dist-pages",
     "typecheck": "tsc --noEmit",
     "preview": "vite preview"
   },

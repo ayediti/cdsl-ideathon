@@ -77,9 +77,17 @@ Phone apps: Messages, Bank, Calculator, **Demat** (holdings + CAS statement) and
 
 Every chapter is open, so learners can jump straight to the one they need. If a chapter depends on earlier ones (savings, shares in the demat account), give it an `entry` list of `ensure*` effects: they run once when the chapter is opened and do nothing if the player already has what is needed. In dev mode, a missing screen id or autopsy snippet logs an error in the console.
 
-## Hosted version
+## GitHub Pages
 
-`npm run build:artifact` builds the copy hosted at https://claude.ai/artifact/96CXv6Fk6jAazB1iaCkL91 into `dist-artifact/`. It differs from the normal build only in [`.env.artifact`](.env.artifact): hash-based routes (the page runs inside a frame) and share links that point to the public page. Confirmations are two-click buttons in the page, because browser `confirm()` dialogs are blocked there.
+The live site is served by GitHub Pages from the `gh-pages` branch, at `https://dukenukem1611.github.io/cdsl-ideathon/` once Pages is switched on (repo **Settings → Pages → Deploy from a branch → `gh-pages` / root**).
+
+To update it:
+
+```bash
+npm run build:pages     # builds into dist-pages/ with hash routes (see .env.pages)
+```
+
+then publish `dist-pages/` to the `gh-pages` branch (it holds only the built site, never source). Pages serves only real files, so routes live after the `#` and shared links never 404.
 
 ## Language, read-aloud, large text, self-check
 

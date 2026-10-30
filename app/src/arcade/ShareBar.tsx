@@ -11,8 +11,11 @@ interface Props {
 export function ShareBar({ text, path }: Props) {
   const t = useT();
   const [copied, setCopied] = useState(false);
-  // The hosted build cannot deep-link into the frame, so it shares the public page link instead.
-  const url = import.meta.env.VITE_PUBLIC_URL || `${window.location.origin}${path}`;
+  // The GitHub Pages build routes after the #, so its links must too.
+  const url =
+    import.meta.env.VITE_ROUTER === 'hash'
+      ? `${window.location.origin}${window.location.pathname}#${path}`
+      : `${window.location.origin}${path}`;
   const canShare = typeof navigator.share === 'function';
 
   const copy = async () => {
