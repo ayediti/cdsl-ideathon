@@ -4,7 +4,7 @@ import type { AppId } from '../engine/types';
 interface PhoneUi {
   open: boolean;
   app: AppId | null;
-  /** Opens the phone, optionally straight into an app (FiAlly: openToolkitToApp). */
+  /** Opens the phone, optionally straight into an app. */
   openTo: (app: AppId | null) => void;
   close: () => void;
 }

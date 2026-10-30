@@ -4,7 +4,7 @@ import { computeFhs, netWorth, sharesValue } from '../engine/fhs';
 import { useSimStore } from '../engine/simStore';
 import { ScoreRing } from './ScoreRing';
 
-/** Side panel with date, health score, balances and XP (FiAlly's "HUD"). */
+/** Side panel with date, health score, balances and XP. */
 export function Hud() {
   const sim = useSimStore();
   const fhs = computeFhs(sim);

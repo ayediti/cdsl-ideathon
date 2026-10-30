@@ -106,7 +106,7 @@ export function scoreDna(answers: DnaType[]): Omit<DnaResult, 'token'> {
 }
 
 // The share token carries the result itself, so shared links work without a backend
-// and without storing anything about the person (FiAlly stores results server-side).
+// and without storing anything about the person.
 export function encodeDnaToken(r: Omit<DnaResult, 'token'>): string {
   const json = JSON.stringify({ d: r.dominant, s: DNA_ORDER.map((t) => r.scores[t]) });
   return btoa(json).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');

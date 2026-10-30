@@ -19,6 +19,7 @@
 \usepackage{titlesec}
 \usepackage[font=footnotesize,labelfont=bf,skip=2pt]{caption}
 \usepackage[hidelinks]{hyperref}
+\usepackage{qrcode} % QR code in the "Try the Prototype" section; delete that line and the \qrcode call if it ever fails to load
 
 % ---- Colours taken from the prototype ------------------------------------------
 \definecolor{brand}{HTML}{0E6B57}
@@ -70,21 +71,20 @@
 \twocolumn[{%
 \begin{center}
   {\LARGE\bfseries FinSim: Learn the Market, and the People Trying to Trick You}\\[3pt]
-  {\normalsize Flintech \;$\cdot$\; Prof. Debashish Chakravarty, Aditi Choudhary, Harshil Agarwal \;$\cdot$\; IIT Kharagpur}\\[1pt]
+  {\normalsize Flintech \;$\cdot$\; Aditi Choudhary, Harshil Agarwal\;$\cdot$\; Mentor: Prof. Debashish Chakravarty\;$\cdot$\; IIT Kharagpur}\\[1pt]
   {\small CDSL Reimagine Ideathon 2027 \;$\cdot$\; Screening Round Submission}
 \end{center}
 \vspace{-3pt}
 \colorbox{soft}{\parbox{\dimexpr\textwidth-2\fboxsep}{\small
 \textbf{Abstract.} India is adding investors faster than it is adding \emph{informed} investors. Only $\sim$9.5\% of households
-invest in securities, fewer than 1\% of people ever attend SEBI's investor education programmes, and 51\% of non-investors say
-they do not trust the market, while fraudsters now reach people directly through WhatsApp, video calls and deepfakes.
+invest in securities, participation in SEBI's investor education programmes remains below 1\%, and 51\% of non-investors cite
+trust as a key barrier, while fraudsters now reach people directly through WhatsApp, video calls and deepfakes.
 \textbf{FinSim} answers with \emph{practice, not lectures}: a free, browser-based platform where people get scammed safely and
 learn the market by living it. Six two-minute, shareable \textbf{scam games} (digital arrest, pension/KYC calls, deepfakes,
 pump-and-dump groups, fake IPO allotments, and the ``golden hour'' after fraud) pull people in; an eight-chapter
 \textbf{investor course} with virtual money and a virtual phone takes them from ``what is a share'' to reading their own CAS. The
 games attract; the course educates. \textbf{The prototype already works, in English and Hindi, with read-aloud, large text
-and a built-in before/after self-check.}\\[1pt]
-\textbf{Keywords:} investor education, cyber fraud, gamified learning, inoculation, securities literacy, inclusion.}}
+and a built-in before/after self-check.}}}
 \vspace{6pt}
 }]
 
@@ -98,11 +98,13 @@ and a built-in before/after self-check.}\\[1pt]
 \begin{itemize}
   \item \textbf{Low participation:} only 3.21\,cr of 33.72\,cr households ($\sim$9.5\%) invest in securities, though 63\% know at
         least one product \cite{ps}.
-  \item \textbf{Education does not reach people:} under 1\% join SEBI's investor education programmes, yet 91\% of those who do
-        rate them highly useful \cite{ps}.
-  \item \textbf{Trust is the barrier:} 51\% of non-investors cite trust; $\sim$80\% of households are risk-averse \cite{ps}.
-  \item \textbf{The most exposed are the least prepared:} 18--29 year-olds score lowest on financial literacy (NCFE) \cite{ps},
-        seniors are prime targets of impersonation scams, and 80\% of demat accounts come from Tier II+ cities.
+  \item \textbf{Education does not reach people:} participation in SEBI's investor education programmes remains below 1\%, yet
+        91\% of past participants rate them highly useful \cite{ps}.
+  \item \textbf{Trust is the barrier:} 51\% of non-investors cite trust as a key barrier; $\sim$80\% of households are risk-averse
+        \cite{ps}.
+  \item \textbf{The most exposed are the least prepared:} 18--29 year-olds score lower on financial literacy than older cohorts
+        (NCFE), cyber fraud disproportionately affects seniors and new investors, and 80\% of demat accounts come from Tier II+
+        cities \cite{ps}.
 \end{itemize}
 \pitch{\textbf{Our insight.} People do not lack information; they lack \emph{rehearsal}. Nobody reads a circular in the middle
 of a ``police'' video call. FinSim lets people rehearse that moment, and dozens like it, before it happens for real.}
@@ -112,10 +114,14 @@ FinSim has two doors into the same goal. Everything inside is simulated: fiction
 
 \textbf{(A) Scam games: the hook.} Six standalone, two-minute games (Table~\ref{tab:games}), each a link you can send on
 WhatsApp. Players make choices in a realistic chat, call or feed, and every game ends with a debrief: a score, a review of each
-choice, the red flags, and the real-world response (1930, cybercrime.gov.in, freezing accounts, SEBI SCORES).
+choice, the red flags, and the real-world response (1930, cybercrime.gov.in, freezing accounts, SEBI SCORES) \cite{sebi}.
 
 \pair{chat.png}{A fake ``inspector'' on a video call}{deepfake.png}{Real or deepfake? Judge, then learn why}
-     {Scam games put the player inside the scam, with consequences.}{fig:games}
+     {Scam games put the player inside the scam, with virtual consequences.}{fig:games}
+
+\textbf{How a round plays.} Each game shows one situation at a time and asks for one decision. Choices cost or earn points, never
+real money, and the story reacts: the fake officer pushes harder, a share price climbs, the minutes in The Golden Hour run
+out. Within two minutes the player has felt the pressure, made a choice and seen exactly which tactic was used.
 
 \begin{inlinetable}
 \captionof{table}{The six scam games.}
@@ -135,7 +141,7 @@ Red Flag Rush     & Spotting flags in IPO, app, KYC scams & Students, investors 
 \end{inlinetable}
 
 \pair{pension.png}{Pension Call: the OTP really says ``add beneficiary''}{rush.png}{Red Flag Rush: tap the tricks against the clock}
-     {Each game drills one habit: read the OTP, spot the bait.}{fig:games2}
+     {Each game drills in financial safety habits}{fig:games2}
 
 \textbf{(B) Investor course: the depth.} Eight chapters in three modules (Table~\ref{tab:course}). Every chapter
 \emph{teaches through interaction first}, with explore cards, sorting, sequencing and hands-on labs (Fig.~\ref{fig:labs}), and
@@ -222,7 +228,7 @@ new code. Static hosting keeps running costs close to zero.
   \item \textbf{Nothing to steal:} no login, no names, no phone numbers; it never asks for PAN, Aadhaar, OTPs or account details.
   \item \textbf{Stays on the device:} progress and scores live only in the user's browser, and one button wipes them.
   \item \textbf{Clean sharing:} share links carry only the game's name, never a score history or identity.
-  \item \textbf{Measurement without tracking:} the pilot uses anonymous, aggregate counts and opt-in surveys, consistent with
+  \item \textbf{Measurement without tracking:} the validation phase uses anonymous, aggregate counts and opt-in surveys, consistent with
         data minimisation under the DPDP Act, 2023 \cite{dpdp}.
 \end{itemize}
 
@@ -233,11 +239,9 @@ new code. Static hosting keeps running costs close to zero.
   \item \textbf{Large-text mode} that scales the whole site, and it works on any phone browser with no install.
   \item \textbf{Built-in before/after self-check}: two equivalent six-message tests measure learning on the device itself.
 \end{itemize}
-Next: Hindi for the course chapters, more regional languages (content is data, so no code changes), an untimed mode for
-seniors and a lite version for low bandwidth.
 
 \pair{hindi.png}{The Pension Call, fully in Hindi}{selfcheck.png}{Before/after self-check (example result)}
-     {Inclusion and measurement are built into the prototype today.}{fig:inclusion}
+     {Inclusion and measurement built into the prototype}{fig:inclusion}
 
 \begin{inlinetable}
 \captionof{table}{Roll-out plan.}
@@ -247,7 +251,7 @@ seniors and a lite version for low bandwidth.
 \textbf{Phase} & \textbf{Deliverables} \\
 \midrule
 1. Done          & Working prototype: 6 games, 8 chapters, 10 articles; English + Hindi, read-aloud, large text, before/after self-check. \\
-2. Validate (3 mo) & Real users at 2--3 colleges and a senior citizens' association; impact measured by the built-in self-check; Hindi course. \\
+2. Validate  & Real users at 2--3 colleges and a senior citizens' association; impact measured by the built-in self-check; Hindi course. \\
 3. Scale         & Links in DP onboarding and CAS emails, SEBI programmes, colleges, WhatsApp; more regional languages. \\
 \bottomrule
 \end{tabularx}
@@ -354,7 +358,24 @@ Confidence in markets    & Self-reported confidence, before/after \\
 The result is the investor the problem statement calls for: informed, responsible, confident, and \emph{Atmanirbhar}.
 
 \pitch{\textbf{Our goal:} help people make safer financial decisions \emph{before} a scammer gets the chance to make them for
-real. \textbf{Our ask:} a pilot with CDSL's investor-awareness network to prove it at scale.}
+real. }
+
+% ================================================================================
+\section{Try the Prototype}
+
+The working prototype is live. It needs no sign-up and no install, and it runs in any phone or laptop browser.
+
+\par\smallskip\noindent
+\begin{minipage}[c]{0.63\columnwidth}\raggedright
+\textbf{Website:}\\[1pt]
+\href{https://dukenukem1611.github.io/cdsl-ideathon/}{\textcolor{brand}{\texttt{dukenukem1611.github.io/cdsl-ideathon}}}\\[4pt]
+\textbf{A 60-second tour:} (1) tap \emph{The Digital Arrest} and play it; (2) switch the site to Hindi with the button at the top;
+(3) read the debrief at the end; (4) open \emph{Self-check} and take the before test.
+\end{minipage}\hfill
+\begin{minipage}[c]{0.33\columnwidth}\centering
+\qrcode[height=2.3cm]{https://dukenukem1611.github.io/cdsl-ideathon/}\\[1pt]{\scriptsize Scan to open}
+\end{minipage}
+\par\smallskip
 
 % ================================================================================
 \begingroup

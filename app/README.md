@@ -2,10 +2,10 @@
 
 An entry for the CDSL Reimagine Ideathon: financial awareness and cyber safety for students, first-time investors and senior citizens. Two entry points:
 
-- **Scam games** (`/arcade/:gameId`): five standalone, shareable two-minute games, plus the "golden hour" game on the landing page. They hook people in.
+- **Scam games** (`/arcade/:gameId`): six standalone, shareable games. They hook people in.
 - **The course** (`/learn`, `/play/...`): a story-driven simulation with simulated money and a virtual phone, covering shares, demat accounts, the CAS, IPOs and investor scams. It teaches in depth.
 
-The course engine follows the FiAlly teardown in [`../fially_teardown.md`](../fially_teardown.md). All companies, apps, people and messages are fictional.
+All companies, apps, people and messages are fictional.
 
 ## Scam games
 
@@ -16,8 +16,9 @@ Each game is pure data in [`src/arcade/games.ts`](src/arcade/games.ts), played b
 | `chat` | [`ChatPlayer`](src/arcade/ChatPlayer.tsx): branching video call, phone call or group chat | The Digital Arrest, The Pension Call, The Tip Group |
 | `realOrFake` | [`RealOrFakePlayer`](src/arcade/RealOrFakePlayer.tsx): judge each card | Real or Deepfake? |
 | `flagRush` | [`FlagRushPlayer`](src/arcade/FlagRushPlayer.tsx): timed hunt for hidden red flags | Red Flag Rush |
+| `goldenHour` | [`GoldenHourPlayer`](src/arcade/GoldenHourPlayer.tsx): every action costs minutes | The Golden Hour |
 
-Every game ends in [`GameEnd`](src/arcade/GameEnd.tsx): a score, item-by-item review, red flags, "if this happens for real" steps and a share bar. Share links carry only the game id. The landing page's [`GoldenHour`](src/arcade/GoldenHour.tsx) teaches what to do in the first hour after a scam.
+Every game ends in [`GameEnd`](src/arcade/GameEnd.tsx): a score, item-by-item review, red flags, "if this happens for real" steps and a share bar. Share links carry only the game id.
 
 ## Run
 
@@ -28,21 +29,21 @@ npm run dev        # http://localhost:5173
 npm run build      # type-check + production build into dist/
 ```
 
-## How it maps to FiAlly
+## How the course engine is organised
 
-| FiAlly | Here |
+| Part | Where |
 |---|---|
-| `/play/:moduleId/:chapterId/:screenId` player | [`src/pages/Player.tsx`](src/pages/Player.tsx) |
+| Player for one screen: `/play/:moduleId/:chapterId/:screenId` | [`src/pages/Player.tsx`](src/pages/Player.tsx) |
 | Chapter `{ id, title, moduleId, screenSequence }` | [`src/engine/types.ts`](src/engine/types.ts) `Chapter` |
-| One `.tsx` per screen (~170 files) | **Data-driven screens** in [`src/content/`](src/content), rendered by 6 generic views in [`src/screens/`](src/screens) |
-| `user_simulation_summary` (sim date, cash, savings, net worth, FHS, XP) | [`src/engine/simStore.ts`](src/engine/simStore.ts) (zustand, persisted to localStorage) |
-| `process_due_mandates_for_profile` RPC | `processMandates()` in `simStore.ts`, run on every `advanceDays` |
-| Scam loss → debit to "Anonymous Beneficiary" + once-key | `scamLoss` effect + `apply(effects, onceKey)` |
-| VirtualPhone + `openToolkitToApp` / `addMessage` | [`src/phone/`](src/phone) + `message` / `unlockApp` effects |
+| Screens are data, not components | [`src/content/`](src/content), rendered by generic views in [`src/screens/`](src/screens) |
+| Simulation state (sim date, cash, savings, net worth, health score, XP) | [`src/engine/simStore.ts`](src/engine/simStore.ts) (zustand, persisted to localStorage) |
+| Scheduled auto-debits and recurring deposits | `processMandates()` in `simStore.ts`, run on every `advanceDays` |
+| Scam losses, applied once even across reloads | `scamLoss` effect + `apply(effects, onceKey)` |
+| Virtual phone and its apps | [`src/phone/`](src/phone) + `message` / `unlockApp` effects |
 | Money DNA (4 axes, share token) | [`src/engine/dna.ts`](src/engine/dna.ts). The token encodes the result itself, so no server and no personal data |
-| FHS (server-side, formula unknown) | [`src/engine/fhs.ts`](src/engine/fhs.ts): cushion 40 + habit 20 + safety 40 |
+| Financial health score | [`src/engine/fhs.ts`](src/engine/fhs.ts): cushion 40 + habit 20 + safety 40 |
 | Per-screen help (reflection + library links) | `help` field on every screen + [`HelpPanel`](src/components/HelpPanel.tsx) |
-| `library/*.md` via Vite glob | [`src/content/library/`](src/content/library) via [`src/engine/library.ts`](src/engine/library.ts) |
+| Library articles | [`src/content/library/`](src/content/library) via [`src/engine/library.ts`](src/engine/library.ts) |
 
 ## Screen kinds
 

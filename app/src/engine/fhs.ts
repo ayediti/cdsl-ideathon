@@ -11,8 +11,7 @@ export function netWorth(s: Pick<SimData, 'cash' | 'savings' | 'rd' | 'holdings'
 }
 
 /**
- * Financial Health Score (0–100). FiAlly computes its FHS server-side and the formula is not public,
- * so this is our own: cushion (0–40) + saving habit (0–20) + fraud safety (0–40).
+ * Financial Health Score (0–100): cushion (0–40) + saving habit (0–20) + fraud safety (0–40).
  */
 export function computeFhs(s: SimData) {
   const cushion = Math.round(Math.min(1, (s.savings + s.rd) / 20000) * 40);

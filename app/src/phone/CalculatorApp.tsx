@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { inr } from '../engine/dates';
 
-/** Monthly-deposit growth calculator (FiAlly installs a calculator in its compounding chapter). */
+/** Monthly-deposit growth calculator, installed in the compounding chapter. */
 export function CalculatorApp() {
   const [monthly, setMonthly] = useState(1000);
   const [rate, setRate] = useState(6.5);

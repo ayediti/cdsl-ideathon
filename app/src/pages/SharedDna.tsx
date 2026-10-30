@@ -4,7 +4,7 @@ import { DnaCard } from '../components/DnaCard';
 import { Logo } from '../components/Logo';
 import { decodeDnaToken } from '../engine/dna';
 
-/** Public share page: /dna/s/:token (FiAlly: /money-dna/s/:token). */
+/** Public share page: /dna/s/:token. */
 export function SharedDna() {
   const { token = '' } = useParams();
   const result = decodeDnaToken(token);

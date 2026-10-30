@@ -89,7 +89,7 @@ function addMessage(s: SimData, m: Omit<Message, 'id' | 'date' | 'read'> & { dat
   return { ...s, messages: [...s.messages, msg] };
 }
 
-/** Runs every mandate instalment due on or before `upTo` (FiAlly: process_due_mandates_for_profile). */
+/** Runs every mandate instalment due on or before `upTo`. */
 function processMandates(s: SimData, upTo: string): SimData {
   let next = s;
   const mandates = s.mandates.map((m) => ({ ...m }));
