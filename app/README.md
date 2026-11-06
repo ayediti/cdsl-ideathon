@@ -80,7 +80,7 @@ Every chapter is open, so learners can jump straight to the one they need. If a 
 
 ## GitHub Pages
 
-The live site is served by GitHub Pages from the `gh-pages` branch, at `https://dukenukem1611.github.io/cdsl-ideathon/` once Pages is switched on (repo **Settings → Pages → Deploy from a branch → `gh-pages` / root**).
+The live site is served by GitHub Pages from the `gh-pages` branch, at https://ayediti.github.io/cdsl-ideathon/ (repo **Settings → Pages → Deploy from a branch → `gh-pages` / root**).
 
 To update it:
 
